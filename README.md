@@ -28,6 +28,8 @@ Průměr krále 18mm. Figurky mají duté jádro z válce minimálně 10 * 1,6mm
 
 Bude třeba testovací tisk, než zabereme 3D farmu
 
+link na online modely figurek https://a360.co/42mMLNg
+
 ### Ovládání figurek
 
 Figurky se budou posouvat pomocí elektromagnetu pod deskou. Aby nenarazily do ostatních figurek, budou se pohybovat po okrajích políček
