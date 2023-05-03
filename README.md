@@ -24,6 +24,10 @@ Vedle šachovnice bude umístěno odkladiště na vyhozené figurky.
 Figurky budou vytisknuty na 3D tiskárně.
 Je třeba zajistit, aby figurky byly dostatečně malé a při přesouvání vždy po okraji políčka nenarazily do jiných figurek (viz. ovládání figurek)
 
+Průměr krále 18mm. Figurky mají duté jádro z válce minimálně 10 * 1,6mm završené kuželem různých velikostí. 
+
+Bude třeba testovací tisk, než zabereme 3D farmu
+
 ### Ovládání figurek
 
 Figurky se budou posouvat pomocí elektromagnetu pod deskou. Aby nenarazily do ostatních figurek, budou se pohybovat po okrajích políček
