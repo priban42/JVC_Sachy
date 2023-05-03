@@ -56,7 +56,7 @@ Finance k tomu potřebné rozdělíme.
 **!!Důležité!! Ponechejte si účtenky z nákupů, cenu sečteme a mezi všechny rovnoměrně rozdělíme**
 
 ## Seznam součástek k nakoupení (nekompletní):
--34 magnetů
+-34 magnetů (+2 na extra dámy i guess)
 -Materiál na desku
 -resin na uhlazení desky
 
