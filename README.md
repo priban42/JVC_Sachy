@@ -49,8 +49,7 @@ DOPLNIT
 (Je třeba vzít v úvahu náhrada pěšce za dámu. Také by byla dobrá implementace zpětné vazby od samotného stroje do grafického rozraní - např. když nelze provést zadaný tah/byl zadán neplatný příkaz, tak se to na displayi vypíše.)
 DOPLNIT
 <br />
-Více zde: [Chess_logic](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Chess_logic))
-<br />
+Více zde: [Chess_logic](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Chess_logic), 
 [GUI](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/GUI)
 
 ### Hlasové ovládání
