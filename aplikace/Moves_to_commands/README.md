@@ -8,4 +8,4 @@ Cílem této části projektu je vytvořit třídu, která bude schopna vygenero
 * program obdrží 2 souřadnice např ((5, 2), (4, 4)), které odpovídají jednomu tahu.
 * vrátí posloupnosti pohybů (souřadnic): [(5, 2), (4.5, 2), (4.5, 4), (4, 4)]
 <br>
-![Screenshot](obrazky/sachovnice.png)
+![Screenshot](/obrazky/sachovnice.png)
