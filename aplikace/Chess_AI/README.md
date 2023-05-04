@@ -7,5 +7,5 @@ Následně pak tento text převede na jednotlivé šachové tahy.
 
 ## Příklad použití
 * Uživate vysloví "C2 na C4".
-* Program vrátí tuple dvojice 2D souřadnic v podobě ((2, 1), (2, 3)).__
+* Program vrátí tuple dvojice 2D souřadnic v podobě ((2, 1), (2, 3)).<br/>
 Tvar souřadnic: (x, y) kde (0 - 7, 0 - 7) = (A - H, 1 - 8)
