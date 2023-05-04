@@ -9,10 +9,10 @@ Program pak musí být schopen určit zda je tento tah provést. Dále jej prove
 
 ## Příklad použití
 ### is_move_valid(move)
-* Program dostance vstup ((2, 1), (2, 3)).
+* Program dostance vstup např. ((2, 1), (2, 3)).
 * vrátí True/False v závislosti na validitě tahu v daném stavu.
 ### do_move(move)
-* Program dostance vstup ((2, 1), (2, 3)).
+* Program dostance vstup např. ((2, 1), (2, 3)).
 * posune figurku.
 ### get_all_valid_moves(position)
 * Program dostance pozici figurky.
