@@ -2,7 +2,7 @@
 
 ## Základní koncept
 
-Cílem této části projektu je vytvořit třídu, která bude schopna Zobrazit objekt šachovnice (vytvořené v části Chess_logic). Dále bude zprostředkovávat ovládání. 
+Cílem této části projektu je vytvořit třídu, která bude schopna Zobrazit objekt šachovnice (vytvořené v části Chess_logic). Zobrazení bude v okně (nejlépe jak pro Windows, tak pro linux). Dále bude zprostředkovávat ovládání. 
 
 ## Příklad použití
 1) Zobrazí se šachovnice se všemi figurkami.
