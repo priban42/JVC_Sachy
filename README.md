@@ -15,7 +15,7 @@ Součástí projektu bude grafická vizualizace šachové desky, která bude slo
 
 ### Šachovnice
 
-Kvůli limitaci plochy na laser-cutteru bude mít šachovnice rozměry 30x30 cm. Délka strany jednoho políčka bude 3,6 cm, což nechává na kraji šachovnice prostor 12 mm pro označení políček čísly 1-8 a písmeny A-H. Materiál - dřevovláknitá deska [Sololit]https://www.bauhaus.cz/drevovlaknita-deska-na-miru-sololit-21485787. Nutnost uhladit plochu pro dobrý pohyb figurek po šachovnici. Návrh ve fusionu. Černá barva políček a ohraničení bude docílena pomocí rastr módu na laser-cutteru.
+Kvůli limitaci plochy na laser-cutteru bude mít šachovnice rozměry 30x30 cm. Délka strany jednoho políčka bude 3,6 cm, což nechává na kraji šachovnice prostor 12 mm pro označení políček čísly 1-8 a písmeny A-H. Materiál - dřevovláknitá deska [Sololit](https://www.bauhaus.cz/drevovlaknita-deska-na-miru-sololit-21485787). Nutnost uhladit plochu pro dobrý pohyb figurek po šachovnici. Návrh ve fusionu. Černá barva políček a ohraničení bude docílena pomocí rastr módu na laser-cutteru.
 
 Vedle šachovnice bude umístěno odkladiště na vyhozené figurky.
 
@@ -28,7 +28,7 @@ Průměr krále 18mm. Figurky mají duté jádro z válce minimálně 10 * 1,6mm
 
 Bude třeba testovací tisk, než zabereme 3D farmu
 
-link na online modely figurek https://a360.co/42mMLNg
+link na online modely [figurek](https://a360.co/42mMLNg)
 
 ### Ovládání figurek
 
