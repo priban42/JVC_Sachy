@@ -53,6 +53,7 @@ DOPLNIT
 
 Je třeba určit formát výstupu z hlasového ovládání (například "[E2:E4]" nebo něco takového)
 DOPLNIT
+Více zde: [a link](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Speech_to_commands)
 
 ### Ovládání motoru arduinem + sériová komunikace
 
