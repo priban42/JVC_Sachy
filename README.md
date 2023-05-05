@@ -46,17 +46,13 @@ DOPLNIT
 
 ### Grafické rozhraní + pravidla
 
-(Je třeba vzít v úvahu náhrada pěšce za dámu. Také by byla dobrá implementace zpětné vazby od samotného stroje do grafického rozraní - např. když nelze provést zadaný tah/byl zadán neplatný příkaz, tak se to na displayi vypíše.)
+(Je třeba vzít v úvahu náhrada pěšce za dámu. ~~Také by byla dobrá implementace zpětné vazby od samotného stroje do grafického rozraní - např. když nelze provést zadaný tah/byl zadán neplatný příkaz, tak se to na displayi vypíše.~~ bude řešeno v počítači v části Chess_logic)
 DOPLNIT
 <br />
 Více zde: [Chess_logic](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Chess_logic), 
 [GUI](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/GUI)
 
 ### Hlasové ovládání
-
-Je třeba určit formát výstupu z hlasového ovládání (například "[E2:E4]" nebo něco takového)
-DOPLNIT
-<br />
 Více zde: [Hlasové ovládání](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Speech_to_commands)
 
 ### Ovládání motoru arduinem + sériová komunikace
