@@ -9,3 +9,5 @@ Cílem této části projektu je vytvořit třídu, která bude schopna vygenero
 * vrátí posloupnosti pohybů (souřadnic): [(5, 2), (4.5, 2), (4.5, 4), (4, 4)]
 
 ![Screenshot](/obrazky/sachovnice.png)
+## Poznámky
+* figurky se z důvodu limitace rozsahu pohyblivé konstrukce nemohou pohybovat po vnějším okraji šachovnice.
