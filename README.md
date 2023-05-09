@@ -15,9 +15,11 @@ Součástí projektu bude grafická vizualizace šachové desky, která bude slo
 
 ### Šachovnice
 
-Kvůli limitaci plochy na laser-cutteru bude mít šachovnice rozměry 30x30 cm. Délka strany jednoho políčka bude 3,6 cm, což nechává na kraji šachovnice prostor 12 mm pro označení políček čísly 1-8 a písmeny A-H. Materiál - dřevovláknitá deska [Sololit](https://www.bauhaus.cz/drevovlaknita-deska-na-miru-sololit-21485787). Nutnost uhladit plochu pro dobrý pohyb figurek po šachovnici. Návrh ve fusionu. Černá barva políček a ohraničení bude docílena pomocí rastr módu na laser-cutteru.
-
-Vedle šachovnice bude umístěno odkladiště na vyhozené figurky.
+Kvůli limitaci plochy na laser-cutteru bude mít šachovnice rozměry 30x30 cm. Délka strany jednoho políčka bude 3,6 cm, což nechává na kraji šachovnice prostor 12 mm pro označení políček čísly 1-8 a písmeny A-H.
+Materiál - <del>dřevovláknitá deska [Sololit](https://www.bauhaus.cz/drevovlaknita-deska-na-miru-sololit-21485787) </del>. **Nebo**
+Druhá možnost vytvořit desku z  **plexiskla**, aby byl vidět mechanismus pod ním. Nutnost uhladit plochu pro dobrý pohyb figurek po šachovnici. 
+Návrh ve fusionu. **Hlasováním bylo rozhodnuto**, že vygravírovaná políčka budou  představovat bílá.
+Návrh ve složce obrázky.
 
 ### Výroba figurek
 
@@ -46,17 +48,13 @@ DOPLNIT
 
 ### Grafické rozhraní + pravidla
 
-(Je třeba vzít v úvahu náhrada pěšce za dámu. Také by byla dobrá implementace zpětné vazby od samotného stroje do grafického rozraní - např. když nelze provést zadaný tah/byl zadán neplatný příkaz, tak se to na displayi vypíše.)
+(Je třeba vzít v úvahu náhrada pěšce za dámu. ~~Také by byla dobrá implementace zpětné vazby od samotného stroje do grafického rozraní - např. když nelze provést zadaný tah/byl zadán neplatný příkaz, tak se to na displayi vypíše.~~ bude řešeno v počítači v části Chess_logic)
 DOPLNIT
 <br />
 Více zde: [Chess_logic](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Chess_logic), 
 [GUI](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/GUI)
 
 ### Hlasové ovládání
-
-Je třeba určit formát výstupu z hlasového ovládání (například "[E2:E4]" nebo něco takového)
-DOPLNIT
-<br />
 Více zde: [Hlasové ovládání](https://github.com/priban42/JVC_Sachy/tree/main/aplikace/Speech_to_commands)
 
 ### Ovládání motoru arduinem + sériová komunikace
