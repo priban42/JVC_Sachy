@@ -15,10 +15,11 @@ Součástí projektu bude grafická vizualizace šachové desky, která bude slo
 
 ### Šachovnice
 
-Kvůli limitaci plochy na laser-cutteru bude mít šachovnice rozměry 30x30 cm. Délka strany jednoho políčka bude 3,6 cm, což nechává na kraji šachovnice prostor 12 mm pro označení políček čísly 1-8 a písmeny A-H. Materiál - dřevovláknitá deska [Sololit](https://www.bauhaus.cz/drevovlaknita-deska-na-miru-sololit-21485787). **Nebo**
-Druhá možnost vytvořit desku z  **plexiskla**, aby byl vidět mechanismus pod ním. Nutnost uhladit plochu pro dobrý pohyb figurek po šachovnici. Návrh ve fusionu. Černá barva políček a ohraničení bude docílena pomocí rastr módu na laser-cutteru.
-
-Vedle šachovnice bude umístěno odkladiště na vyhozené figurky.
+Kvůli limitaci plochy na laser-cutteru bude mít šachovnice rozměry 30x30 cm. Délka strany jednoho políčka bude 3,6 cm, což nechává na kraji šachovnice prostor 12 mm pro označení políček čísly 1-8 a písmeny A-H.
+Materiál - <del>dřevovláknitá deska [Sololit](https://www.bauhaus.cz/drevovlaknita-deska-na-miru-sololit-21485787) </del>. **Nebo**
+Druhá možnost vytvořit desku z  **plexiskla**, aby byl vidět mechanismus pod ním. Nutnost uhladit plochu pro dobrý pohyb figurek po šachovnici. 
+Návrh ve fusionu. **Hlasováním bylo rozhodnuto**, že vygravírovaná políčka budou  představovat bílá.
+Návrh ve složce obrázky.
 
 ### Výroba figurek
 
