@@ -38,11 +38,8 @@ class CNC_stepper{
     float max_Speed = 50.0;
     float acceleration = 100.0;
 
-    float steps_per_mm_X = 80.0;
-    float steps_per_mm_Y = 80.0;
-
-    long directionX = -1; //1 or -1
-    long directionY = -1;
+    float steps_per_mm_X = 40.0;
+    float steps_per_mm_Y = 40.0;
 
     long current_X = 0;
     long current_Y = 0;

@@ -26,10 +26,9 @@ class CNC_movement{
     
     float max_Speed = 140.0; // mm/s
     float acceleration = 1000.0;
-    float accIndex = 1;
     
-    float spmm_X = 80.0;//79.8; // 42.4 steps per mm
-    float spmm_Y = 80.0;//79.8;
+    float spmm_X = 40.0;//79.8; // 42.4 steps per mm
+    float spmm_Y = 40.0;//79.8;
     
     long maxdX = 230*spmm_X;
     long maxdY = 230*spmm_Y;
@@ -44,24 +43,6 @@ class CNC_movement{
     
     long current_X = 0;
     long current_Y = 0;
-
-    long distanceToGo_X;
-    long distanceToGo_Y;
-
-    int directionX = -1;
-    int directionY = -1;
-
-    byte byteX = 2;
-    byte byteY = 2;
-
-    long baseX = long(1)<<(8*byteX - 1);
-    long baseY = long(1)<<(8*byteY - 1);
-
-    float Base;
-    float meziSpeed;
-    float meziAcceleration;
-
-    long long_null = -2147483648;
 };
 
 #endif

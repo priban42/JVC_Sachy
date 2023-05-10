@@ -52,6 +52,14 @@ void Parser::parseNext(){
     case 5:
       CNC.enableMotors();
       break;
+    case 6://set speed
+      CNC.max_Speed = float(readValue(byteF));
+      //Serial.write(42);
+      //Serial.println(CNC.max_Speed);
+      break;
+    case 7://set acceleration
+      CNC.acceleration = float(readValue(byteA));
+      break;
   }
 
   Serial.write(69);

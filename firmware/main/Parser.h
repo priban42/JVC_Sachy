@@ -12,12 +12,11 @@ class Parser{
     
   private:
 
-    byte byteX = 2;
-    byte byteY = 2;
-    byte byteF = 3;
+    byte byteX = 3;
+    byte byteY = 3;
+    byte byteF = 2;
     byte byteC = 1;
     byte byteA = 2;
-    byte coreXY = 1;
 
 
     long base_X = long(1)<<(8*byteX - 1);
