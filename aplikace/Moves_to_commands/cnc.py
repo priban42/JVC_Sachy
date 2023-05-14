@@ -32,8 +32,7 @@ class Cords:
   def __init__(self, x, y):
     self.x = x
     self.y = y
-
-
+      
 def print_board(chess_status, path):
   fig = plt.figure(figsize=(8, 8))
   ax = fig.add_axes([0.05, 0.05, 1, 1])
@@ -63,10 +62,33 @@ def fill_board_status(chess_status, cords):
         chess_status[(i,j)] = 0
       else:
         chess_status[(i,j)] = random.randint(0, 0)
-        chess_status[(4,1)] = 1
   return chess_status
-
+  
 def make_path_squares(chess_status, start_cords, final_cords):
+  xs, ys = start_cords.x, start_cords.y
+  xf, yf = final_cords.x, final_cords.y
+  path = []
+  path.append((xs,ys))
+  '''
+  Pohyb po čtverečkách pokud nemá nic ve svém řádku/sloupci/diagonále
+  '''
+  while xs != xf or ys != yf:
+    if xs < xf and xs + 1 <= 7:
+      xs += 1
+    elif xs > xf and xs - 1 >= 0:
+      xs -= 1
+    if ys < yf and ys + 1 <= 7:
+      ys += 1
+    elif ys > yf and ys - 1 >= 0:
+      ys -= 1
+    if chess_status[(xs,ys)] == 0:
+      path.append((xs,ys))
+      print("CORDS:", xs, ys)
+    else:
+      return False, None
+  return True, path
+
+def make_path_lines(chess_status, start_cords, final_cords):
   xs, ys = start_cords.x, start_cords.y
   xf, yf = final_cords.x, final_cords.y
   path = []
@@ -74,7 +96,6 @@ def make_path_squares(chess_status, start_cords, final_cords):
   path.append((xs,ys))
   print("CORDS:", xs, ys)
   '''
-  81 - 99
   Rozhodne jakým směrem půjde na základě vzdálenosti 
   finálních souřadnic a startovních souřadnic
   '''
@@ -132,8 +153,13 @@ def decide(chess_status, start_cords, final_cords):
     print(path)
     return path
   else:
-    print("ERROR creating path")
-    exit()
+    valid, path = make_path_lines(chess_status, start_cords, final_cords)
+    if valid:
+      print(path)
+      return path
+    else:
+      print("ERROR creating path")
+      exit()
   
 def move(chess_status, cords):
   start_cords = Cords(cords[0][0], cords[0][1])
@@ -143,7 +169,7 @@ def move(chess_status, cords):
 
 chess_status = dict()
 
-cords = [(2,2),(2,5)]
+cords = [(7,7),(0,0)]
 
 
 fill_board_status(chess_status, cords)
