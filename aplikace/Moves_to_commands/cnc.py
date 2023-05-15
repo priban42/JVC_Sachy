@@ -191,6 +191,11 @@ def decide(chess_status, start_cords, final_cords):
       exit()
   
 def move(chess_status, cords):
+  '''
+  VÝSTUP path př  [(7,7),(7,6),(7,5),(6,5)]
+  
+  Tato funkce se volá. V ní se vše provede a vrátí cestu (path) se souřadnicemi
+  '''
   start_cords = Cords(cords[0][0], cords[0][1])
   final_cords = Cords(cords[1][0], cords[1][1])  
   path = decide(chess_status, start_cords, final_cords)
