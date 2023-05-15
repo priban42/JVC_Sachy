@@ -300,6 +300,9 @@ class ChessGUI(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
+                    if _speech_commands:
+                        self._speech_recog.runControl = False
+                        self._speech_recog.join(1)
 
                 if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
                     pass
@@ -308,6 +311,13 @@ class ChessGUI(object):
 
             if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
                 self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
+
+            if _speech_commands:
+                if self._speech_recog.dataReady:
+                    if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                        pass
+                    elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
+                        pass
 
             if self._mouse_down:
                 pos = pygame.mouse.get_pos()
