@@ -63,8 +63,20 @@ def fill_board_status(chess_status, cords):
       else:
         chess_status[(i,j)] = random.randint(0, 0)
   return chess_status
-  
+
+#---------------------------Funkce pod čarou jsou potřeba------------------------------------------------
 def make_path_squares(chess_status, start_cords, final_cords):
+  '''
+  VSTUPY - (chess_status) obsazenost políček - dict((x,y) = status př. chess_status[(1,2)] = 0 ==> na souřadnicích (1,2) nic není
+         - (start_cords) počáteční souřadnice
+         - (final_cords) finální souřadnice
+  
+  VÝSTUP - (valid, path) platnost provedení a cesta s posloupností souřadnic od staru do finishe
+  
+  Funkce vrací pole souřadnic, od startovních po finální, pokud je možné
+  aby se figurka mohla pohybovat celou dobu po čtverečkách, v opačném případě
+  varcí False, None a provede se funkce druhá make_path_lines
+  '''
   xs, ys = start_cords.x, start_cords.y
   xf, yf = final_cords.x, final_cords.y
   path = []
@@ -89,6 +101,17 @@ def make_path_squares(chess_status, start_cords, final_cords):
   return True, path
 
 def make_path_lines(chess_status, start_cords, final_cords):
+  '''
+  VSTUPY - (chess_status) obsazenost políček
+         - (start_cords) počáteční souřadnice
+         - (final_cords) finální souřadnice
+  
+  VÝSTUP - (valid, path) platnost provedení a cesta s posloupností souřadnic od staru do finishe
+  
+  Funkce vrací pole souřadnic, od startovních po finální, pokud je možné
+  aby se figurka mohla pohybovat celou dobu po čtverečkách, v opačném případě
+  varcí False, None a provede se funkce druhá make_path_lines
+  '''
   xs, ys = start_cords.x, start_cords.y
   xf, yf = final_cords.x, final_cords.y
   path = []
@@ -148,6 +171,12 @@ def make_path_lines(chess_status, start_cords, final_cords):
   return True, path
 
 def decide(chess_status, start_cords, final_cords):
+  '''
+  VÝSTUP - (valid, path) platnost provedení a cesta s posloupností souřadnic od staru do finishe
+  
+  Rozhodne jakým způsobem stroj hrací plochu projde. Pokud nebudou v cestě žádné figurky
+  půjde klasiky po čtverečkách. Pokud bude něco v cestě půjde po krajích čtverečků
+  '''
   valid, path = make_path_squares(chess_status, start_cords, final_cords)
   if valid:
     print(path)
@@ -167,11 +196,17 @@ def move(chess_status, cords):
   path = decide(chess_status, start_cords, final_cords)
   return path
 
+#-------------------------------FUNKCE NAD JSOU POTŘEBA-------------------------------------
+
+
 chess_status = dict()
-
+#------------VSTUP-------------
 cords = [(7,7),(0,0)]
-
-
+#------------------------------
 fill_board_status(chess_status, cords)
+
+#------------VÝSTUP-----------
 path = move(chess_status, cords)
+#-----------------------------
+
 print_board(chess_status, path)
