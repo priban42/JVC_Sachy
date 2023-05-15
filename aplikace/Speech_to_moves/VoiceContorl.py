@@ -13,7 +13,7 @@ import threading
 
 class VoiceControl(threading.Thread):
 
-    def __init__(self, debug=False, recordTime=5, info=True):
+    def __init__(self, debug=False, recordTime=5, info=True, lan="en-US"):
         """
         VoiceControl initialization
 
@@ -22,6 +22,9 @@ class VoiceControl(threading.Thread):
         :param recordTime: default 5 seconds | how long user input will be recorded each time
 
         :param info: default True | print info for user
+
+        :param lan: default "en-US" | set "cs-CZ" for czech other languages can be found here
+        https://cloud.google.com/speech-to-text/docs/speech-to-text-supported-languages
         """
         threading.Thread.__init__(self)
         self.r = sr.Recognizer()
@@ -34,6 +37,7 @@ class VoiceControl(threading.Thread):
         self.runControl = True
         self.recordTime = recordTime
         self.info = info
+        self.lan = lan
 
     def run(self):
         while self.runControl:
@@ -44,7 +48,10 @@ class VoiceControl(threading.Thread):
                     self.dataReady = True
                 else:
                     if self.info:
-                        print("Move not recognised from your command")
+                        if self.lan == "cs-CZ":
+                            print("Z vašeho příkazu nebyl rozpoznán tah")
+                        else:
+                            print("Move not recognised from your command")
 
     def read_data(self):
         """
@@ -102,7 +109,10 @@ class VoiceControl(threading.Thread):
             board_cords = (coordinates[0].upper(), coordinates[1].upper())
             num_cords = (numeric_coordinates[0], numeric_coordinates[1])
             if self.info:
-                print("VoiceControl recognised move {}".format(board_cords))
+                if self.lan == "cs-CZ":
+                    print("Byl rozpoznán tah {}".format(board_cords))
+                else:
+                    print("VoiceControl recognised move {}".format(board_cords))
             if self.debug:
                 print("VoiceControl recognised move {}".format(num_cords))
             return num_cords
@@ -117,17 +127,29 @@ class VoiceControl(threading.Thread):
         try:
             with sr.Microphone() as source:
                 if self.info:
-                    print("You can speak in a second")
+                    if self.lan == "cs-CZ":
+                        print("Za vteřinu můžete mluvit")
+                    else:
+                        print("You can speak in a second")
                 self.r.adjust_for_ambient_noise(source, duration=0.4)  # Surroundings adjustment
                 if self.info:
-                    print("You can speak")
+                    if self.lan == "cs-CZ":
+                        print("Můžete mluvit")
+                    else:
+                        print("You can speak")
 
                 audio = self.r.record(source, duration=self.recordTime)  # Listen for user input
 
-                text = self.r.recognize_google(audio).lower()  # Google text recognition
+                text = self.r.recognize_google(audio, language=self.lan).lower()  # Google text recognition
 
-                if self.debug:
-                    print("Did you say ", text)
+                if self.info:
+                    if self.lan == "cs-CZ":
+                        print("Slyšel jsem ", text)
+                        print("Zpracovávám příkaz")
+                    else:
+                        print("I heard", text)
+                        print("Processing yor command")
+                time.sleep(1)
                 return text
 
         except sr.RequestError as e:  # Server connection error
@@ -151,7 +173,7 @@ class VoiceControl(threading.Thread):
 if __name__ == "__main__":
     # commands in english, can be said anything containing the two coordinates FIRST where we start SECOND where we go
     # E.g. move this from A3 to maybe A4, will return ((0, 2), (0, 3))
-    voice_control = VoiceControl(debug=False, info=True, recordTime=4)  # initialize
+    voice_control = VoiceControl(debug=True, info=True, recordTime=4, lan="cs-CZ")  # initialize
     voice_control.start()
 
     # sample code
