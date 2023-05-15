@@ -1,16 +1,17 @@
 """
-Implementation of AI player class for our voice controlled chess project using Stockfish engine
+Implementation of AI player class for our voice controlled chess project using Stockfish engine version 15.1 
+(download available at https://stockfishchess.org)
 
 It requires you to have the Stockfish engine executable file and 'stockfish' python lib installed 
 """
 
 from stockfish import Stockfish
 
-_HASH_SIZE_DEFAULT = 512
-_ELO_DEFAULT = 800
+_HASH_SIZE_DEFAULT = 256
 _THREADS_DEFAULT = 1
-_DEPTH_DEFAULT = 18
+_DEPTH_DEFAULT = 15
 _MOVE_TIME_DEFAULT = 3000
+_SKILL_LEVEL_DEFAULT = 1
 
 class ChessAI(object):
     """
@@ -37,7 +38,7 @@ class ChessAI(object):
 
     def __init__(self, path: str, depth: int = _DEPTH_DEFAULT,  move_time_ms: int = _MOVE_TIME_DEFAULT):
         self.move_time = move_time_ms
-        self.engine = Stockfish(path, depth, {"UCI_Elo": _ELO_DEFAULT, "Threads": _THREADS_DEFAULT, "Hash": _HASH_SIZE_DEFAULT})
+        self.engine = Stockfish(path, depth, {"Skill level": _SKILL_LEVEL_DEFAULT, "Threads": _THREADS_DEFAULT, "Hash": _HASH_SIZE_DEFAULT})
 
     def get_move(self, players_move: str) -> str:
         """
@@ -64,30 +65,37 @@ class ChessAI(object):
 
         return ret
     
-    def set_parameters(self, elo: int = _ELO_DEFAULT, threads: int = _THREADS_DEFAULT, hash_size: int = _HASH_SIZE_DEFAULT) -> None:
+    def set_parameters(self, skill_level: int = _SKILL_LEVEL_DEFAULT, threads: int = _THREADS_DEFAULT, hash_size: int = _HASH_SIZE_DEFAULT) -> None:
         """
         Sets parameters of Stockfish engine
 
         Parameters
         ----------
-        elo : int
-            Desired elo rating of AI opponent (default is 800)
+        skill_level : int
+            Desired skill level of Stockfish engine (default is 1 and beyond level 7 is pretty much unbeatable, min 0 max 20)
         threads : int
             Number of threads Stockfish engine will be allowed to use (default is 1)
         hash_size : int 
-            Size of RAM (in MB) that Stockfish will be allowed to use, use powers of 2 (default is 512)
+            Size of RAM (in MB) that Stockfish will be allowed to use, use powers of 2 (default is 256)
 
         Returns
         -------
         None
         """
 
-        self.engine.update_engine_parameters({"UCI_Elo": elo, "Threads": threads, "Hash": hash_size})
+        self.engine.update_engine_parameters({"Skill level": skill_level, "Threads": threads, "Hash": hash_size})
 
 
 if __name__ == "__main__":
-    player_move = str(input("Enter first chess move (for example e2e4): "))
+    """ player_move = str(input("Enter first chess move (for example e2e4): "))
     opponent = ChessAI(".\stockfish_15.1_win_x64_avx2\stockfish-windows-2022-x86-64-avx2.exe")
     print(player_move)
     opponent.set_parameters(1400, 1, 512)
-    print(opponent.get_move(player_move))
+    print(opponent.get_move(player_move)) """
+    opponent = ChessAI(".\stockfish_15.1_win_x64_avx2\stockfish-windows-2022-x86-64-avx2.exe")
+    opponent.set_parameters(900, 1, 1024)
+    print(opponent.engine.get_parameters())
+    opponent.engine.make_moves_from_current_position(["e2e4", "f7f6", "e4e5", "e7e6", "e5f6", "e6e5", "f6g7"])
+    print(opponent.get_move("e5e4"))
+    print(opponent.engine.get_evaluation())
+    print(opponent.engine.get_wdl_stats())
