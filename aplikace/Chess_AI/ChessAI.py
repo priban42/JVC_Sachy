@@ -41,13 +41,16 @@ class ChessAI(object):
 
     def get_move(self, players_move: str) -> str:
         """
-        Method that takes in player's move and returns the best move AI opponent can make as string in algebraic notaion
+        Method that takes in player's move in algebraic notation (e.g. "e2e4") and returns the best move AI opponent can make as 
+        string in algebraic notaion
 
         Parameters
         ----------
         players_move : str
             Move that a real player executed, if you send empty string "" with the first move of the game
             the engine will start game as white, otherwise it will react to your first move as black
+
+            Example: "e2e4"
 
         Returns
         -------
@@ -56,8 +59,10 @@ class ChessAI(object):
         """
 
         self.engine.make_moves_from_current_position([players_move])
-        
-        return self.engine.get_best_move(self.move_time, self.move_time)
+        ret = self.engine.get_best_move(self.move_time, self.move_time)
+        self.engine.make_moves_from_current_position([ret])
+
+        return ret
     
     def set_parameters(self, elo: int = _ELO_DEFAULT, threads: int = _THREADS_DEFAULT, hash_size: int = _HASH_SIZE_DEFAULT) -> None:
         """
