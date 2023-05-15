@@ -38,7 +38,9 @@ class ChessGUI(object):
     """---AUDIO STUFF---"""
     _NORMAL_MOVE_SOUND = pygame.mixer.Sound("GUI/src/normal_move.mp3")
     _CAPTURE_MOVE_SOUND = pygame.mixer.Sound("GUI/src/capture.mp3")
-
+    _CHECK_MOVE_SOUND = pygame.mixer.Sound("GUI/src/move-check.mp3")
+    _PROMOTION_MOVE_SOUND = pygame.mixer.Sound("GUI/src/promote.mp3")
+    _CASTLE_MOVE_SOUND = pygame.mixer.Sound("GUI/src/castle.mp3")
     """--- GAME MODES ---"""
     _PVP = 1
     _PVAI = 2
@@ -150,11 +152,20 @@ class ChessGUI(object):
     def __get_row_col(self, x, y):
         return [y // self._RECT_SIZE, x // self._RECT_SIZE]
 
-    def __play_sound(self, new_row, new_col):
-        if self.__logic.get_piece(new_row, new_col) != 0:
-            pygame.mixer.Sound.play(self._CAPTURE_MOVE_SOUND)
+    def __play_sound(self,move, promotion):
+        if abs(self.__logic.get_piece(*move[0])) == 6 and abs(self.__logic.get_piece(*move[1])) == 2:
+            pygame.mixer.Sound.play(self._CASTLE_MOVE_SOUND)
+            print("castle")
+        elif promotion != "":
+            print("promotion")
+            pygame.mixer.Sound.play(self._PROMOTION_MOVE_SOUND)
         else:
-            pygame.mixer.Sound.play(self._NORMAL_MOVE_SOUND)
+            if self.__logic.get_piece(*move[1]) != 0:
+                print("capture")
+                pygame.mixer.Sound.play(self._CAPTURE_MOVE_SOUND)
+            else:
+                print("normal")
+                pygame.mixer.Sound.play(self._NORMAL_MOVE_SOUND)
 
     def _determine_move(self):
         new_row, new_col = self.__get_row_col(*self._hover_pos)
@@ -186,7 +197,7 @@ class ChessGUI(object):
         :return: None
         """
         self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
-        self._stockfish.set_parameters()
+        self._stockfish.set_parameters(200, 1, 512)
 
     def _eval_player_move(self, event):
         """
@@ -223,7 +234,10 @@ class ChessGUI(object):
                         self._choosing_promotion = False
 
     def _play_stockfish_move(self, move, promotion=""):
-        move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
+        if move:
+            move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
+        else:
+            move = self._stockfish.get_move("")
         move = [logic.cmd_to_row_col(move[0:2]), logic.cmd_to_row_col(move[2:4])]
         if len(move) == 5:
             promotion = move[4]
@@ -237,11 +251,16 @@ class ChessGUI(object):
         """
         if self.__logic.is_valid_move(move, promotion=promotion):
             # play sound
-            self.__play_sound(*move[1])
+            self.__play_sound(move, promotion)
             # Do the move
             self.__logic.play_move(move, promotion)
             self._recently_played_move = move
             self._recent_promotion = promotion
+            if self.__logic.is_checkmate():
+                print("PLAYER: ", self.__logic.get_player_playing() * -1, " WON")
+                self.__logic.reset_board()
+                self._recently_played_move = ""
+                self._recent_promotion = ""
             ## TODO: move to commands
             ## TODO: send to serial
 
@@ -314,10 +333,15 @@ class ChessGUI(object):
 
             if _speech_commands:
                 if self._speech_recog.dataReady:
+                    move = self._speech_recog.read_data()
                     if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
                         pass
                     elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
-                        pass
+                        if self.__logic.is_valid_move(move):
+                            self.play_move(move)
+                    elif mode == self._PVP:
+                        if self.__logic.is_valid_move(move):
+                            self.play_move(move)
 
             if self._mouse_down:
                 pos = pygame.mouse.get_pos()

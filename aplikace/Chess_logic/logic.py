@@ -213,6 +213,19 @@ class ChessBoard(object):
             return True
         return False
 
+    def is_checkmate(self):
+        return self.__logic.outcome()
+
+    def is_check(self, move, promotion):
+        return self.__logic.gives_check(self.__move_to_str(move) + promotion)
+
+    def reset_board(self):
+        self.__logic.reset()
+        self.__logic.clear_stack()
+        self.player_playing = -1
+        self._update_board()
+
+
 
 if __name__ == "__main__":
     board = ChessBoard()
