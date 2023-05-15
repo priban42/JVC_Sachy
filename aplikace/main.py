@@ -1,9 +1,13 @@
 import pygame
 from Chess_logic import logic
+from GUI import menu
+from Speech_to_moves import VoiceControl
+from Chess_AI import ChessAI
 
 """Test function before chess logic is done"""
 
 promotion_map = {(0, 0): "r", (0, 1): "n", (1, 0): "b", (1, 1): "q"}
+_STOCKFISH_ENGINE_PATH = "/opt/homebrew/bin/stockfish"
 
 
 class ChessGUI(object):
@@ -35,9 +39,14 @@ class ChessGUI(object):
     _NORMAL_MOVE_SOUND = pygame.mixer.Sound("GUI/src/normal_move.mp3")
     _CAPTURE_MOVE_SOUND = pygame.mixer.Sound("GUI/src/capture.mp3")
 
+    """--- GAME MODES ---"""
+    _PVP = 1
+    _PVAI = 2
+
     promotion_x, promotion_y = _WIDTH / 2 - _PIECE_IMG_SIZE * 1.5, _HEIGHT / 2 - _PIECE_IMG_SIZE * 1.5
 
     def __init__(self):
+        """---------- VISUAL STUFF --------"""
         self._PROMOTION_POPUP_WHITE = pygame.Surface([3 * self._PIECE_IMG_SIZE, 3 * self._PIECE_IMG_SIZE])
         self._PROMOTION_POPUP_BLACK = pygame.Surface([3 * self._PIECE_IMG_SIZE, 3 * self._PIECE_IMG_SIZE])
         self.piece_imgs = self.__load_images()
@@ -45,11 +54,17 @@ class ChessGUI(object):
         self._mouse_down = False
         self._clicked_pos = None
         self._hover_pos = None
-        self.__logic = logic.ChessBoard()
-        self.valid_moves = []
         self._choosing_promotion = False
         self._choosing_promotion_color = None
         self._promotion_move = None
+        """----------- FUNCTIONAL STUFF -----------"""
+        self.__logic = logic.ChessBoard()
+        self.valid_moves = []
+        self._speech_recog = None
+        self._stockfish = None
+        self.my_color = -1
+        self._recently_played_move = ""
+        self._recent_promotion = ""
 
     def __load_images(self):
         """
@@ -153,60 +168,146 @@ class ChessGUI(object):
                 self._mouse_down = False
                 self._promotion_move = move
                 return
-            # play sound
-            self.__play_sound(new_row, new_col)
-            # Do the move
-            self.__logic.play_move(move)
+            self.play_move(move)
         self._mouse_down = False
         self._clicked_pos = None
 
-    def draw(self, win):
+    def __init_speech(self) -> None:
+        """
+        Initializes speech recognition module and starts new thread
+        :return: None
+        """
+        self._speech_recog = VoiceControl.VoiceControl(debug=True, info=True, recordTime=4, lan="cs-CZ")
+        self._speech_recog.start()
+
+    def __init_stockfish(self) -> None:
+        """
+        Initializes stockfish engine and sets parameters
+        :return: None
+        """
+        self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
+        self._stockfish.set_parameters()
+
+    def _eval_player_move(self, event):
+        """
+        Evaluates what move is being played based on users input
+        :param event: pygame.event
+        :return:
+        """
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                pos = pygame.mouse.get_pos()
+                if not self._choosing_promotion:
+                    self._clicked_pos = self.__get_row_col(pos[0] - self._BOARD_IMG_OFFSET[0],
+                                                           pos[1] - self._BOARD_IMG_OFFSET[1])
+                    if self.__logic.get_piece(*self._clicked_pos) != 0:
+                        self._mouse_down = True
+                        self.valid_moves = self.__logic.get_valid_moves(self._clicked_pos)
+                    else:
+                        self._clicked_pos = None
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if not self._choosing_promotion:
+                if event.button == pygame.BUTTON_LEFT and self._mouse_down:
+                    self._determine_move()
+            else:
+                if event.button == pygame.BUTTON_LEFT:
+                    pos = pygame.mouse.get_pos()
+                    x = round((pos[0] - self.promotion_x - self._PIECE_IMG_SIZE / 2 - self._BOARD_IMG_OFFSET[
+                        0]) // self._PIECE_IMG_SIZE)
+                    y = round((pos[1] - self.promotion_y - self._PIECE_IMG_SIZE / 2 - self._BOARD_IMG_OFFSET[
+                        1]) // self._PIECE_IMG_SIZE)
+                    if (x in [0, 1]) and (y in [0, 1]):
+                        chosen_promotion = promotion_map[(y, x)]
+                        self.play_move(self._promotion_move, chosen_promotion)
+                        self._choosing_promotion = False
+
+    def _play_stockfish_move(self, move, promotion=""):
+        move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
+        move = [logic.cmd_to_row_col(move[0:2]), logic.cmd_to_row_col(move[2:4])]
+        if len(move) == 5:
+            promotion = move[4]
+        self.play_move(move, promotion)
+
+    def play_move(self, move, promotion="") -> None:
+        """
+        Plays move and handles all of the logic (sending to Arduino, updating board etc...)
+        :param: move = [[start row, start col], [end row, end col]]
+        :return: None
+        """
+        if self.__logic.is_valid_move(move, promotion=promotion):
+            # play sound
+            self.__play_sound(*move[1])
+            # Do the move
+            self.__logic.play_move(move, promotion)
+            self._recently_played_move = move
+            self._recent_promotion = promotion
+            ## TODO: move to commands
+            ## TODO: send to serial
+
+    def draw(self, win: pygame.Surface) -> None:
+        """
+        Draws chess board to win
+        :param win: pygame.Surface
+        :return: None
+        """
         win.fill(self._BG_COLOR)
         self.__draw_chess_board(self.chess_board)
         win.blit(self.chess_board, [0, 0])
         pygame.display.flip()
 
-    def main(self):
+    def main(self) -> None:
         """---- SETUP ----"""
         win = pygame.display.set_mode((self._WIDTH, self._HEIGHT))
         pygame.display.set_caption("Speech Chess")
-        self.draw(win)
+        """ --- SETTINGS SCREEN ---"""
+        run = True
+        _menu = menu.Menu([self._WIDTH, self._HEIGHT])
+        _speech_commands = False
+        mode = self._PVP
+        clock = pygame.time.Clock()
+        while run:
+            clock.tick(30)
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    run = False
+            if _menu.update(events):
+                settings = _menu.get_settings()
+                # [1v1, 1vAI, speech_commands]
+                mode = None
+                if settings[0]:
+                    mode = self._PVP
+                elif settings[1]:
+                    mode = self._PVAI
+                _speech_commands = settings[2]
+                if mode:
+                    run = False
+
+            win.blit(_menu.screen, [0, 0])
+            pygame.display.flip()
+
+        """---- Start speech recog thread"""
+        if _speech_commands:
+            self.__init_speech()
+        if mode == self._PVAI:
+            self.__init_stockfish()
         """---- Main Loop ----"""
+        self.draw(win)
         run = True
         while run:
+            clock.tick(30)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == pygame.BUTTON_LEFT:
-                        pos = pygame.mouse.get_pos()
-                        if not self._choosing_promotion:
-                            self._clicked_pos = self.__get_row_col(pos[0] - self._BOARD_IMG_OFFSET[0],
-                                                                   pos[1] - self._BOARD_IMG_OFFSET[1])
-                            if self.__logic.get_piece(*self._clicked_pos) != 0:
-                                self._mouse_down = True
-                                self.valid_moves = self.__logic.get_valid_moves(self._clicked_pos)
-                            else:
-                                self._clicked_pos = None
+                if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                    pass
+                else:
+                    self._eval_player_move(event)
 
-                if event.type == pygame.MOUSEBUTTONUP:
-                    if not self._choosing_promotion:
-                        if event.button == pygame.BUTTON_LEFT and self._mouse_down:
-                            self._determine_move()
-                    else:
-                        if event.button == pygame.BUTTON_LEFT:
-                            pos = pygame.mouse.get_pos()
-                            x = round((pos[0] - self.promotion_x - self._PIECE_IMG_SIZE / 2 - self._BOARD_IMG_OFFSET[
-                                0]) // self._PIECE_IMG_SIZE)
-                            y = round((pos[1] - self.promotion_y - self._PIECE_IMG_SIZE / 2 - self._BOARD_IMG_OFFSET[
-                                1]) // self._PIECE_IMG_SIZE)
-                            if (x in [0, 1]) and (y in [0, 1]):
-                                chosen_promotion = promotion_map[(y, x)]
-                                if self.__logic.is_valid_move(self._promotion_move, chosen_promotion):
-                                    self.__play_sound(*self._promotion_move[1])
-                                    self.__logic.play_move(self._promotion_move, chosen_promotion)
-                                self._choosing_promotion = False
+            if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
 
             if self._mouse_down:
                 pos = pygame.mouse.get_pos()

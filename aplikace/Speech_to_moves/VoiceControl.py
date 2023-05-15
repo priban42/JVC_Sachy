@@ -28,7 +28,7 @@ class VoiceControl(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.r = sr.Recognizer()
-        self.engine = pyttsx3.init()
+        #self.engine = pyttsx3.init()
         self.debug = debug
         self.letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
         self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8"]
@@ -158,17 +158,17 @@ class VoiceControl(threading.Thread):
         except sr.UnknownValueError:  # Anything else
             print("ERROR: VoiceControl - unknown")
 
-    def SpeakText(self, command, speed=150):
-        """
+    """def SpeakText(self, command, speed=150):
+        \"""
         Text to speech
 
         :param command: String format of text to say
         :param speed: Default 150 | Sets speed of talking
-        """
+        \"""
         self.engine.setProperty('rate', speed)
         self.engine.say(command)
         self.engine.runAndWait()
-
+"""
 
 if __name__ == "__main__":
     # commands in english, can be said anything containing the two coordinates FIRST where we start SECOND where we go

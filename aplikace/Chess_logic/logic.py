@@ -9,7 +9,7 @@ def cmd_to_row_col(cmd: str):
     :param cmd: eg: "a1" or "h8" ...
     :return: [row, col] in board
     """
-    return 8 - int(cmd[1]), ord(cmd[0]) - 97
+    return [8 - int(cmd[1]), ord(cmd[0]) - 97]
 
 
 def row_col_to_cmd(row, col):
