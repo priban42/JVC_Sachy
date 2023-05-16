@@ -255,6 +255,14 @@ class ChessGUI(object):
             promotion = move[4]
         self.play_move(move, promotion)
 
+    def _get_coords(self):
+        full_squares = []
+        for row in range(8):
+            for col in range(8):
+                if self.__logic.get_piece(row, col) != 0:
+                    full_squares.append([col, 7 - row])
+
+
     def __reset_board(self) -> None:
         print("PLAYER: ", self.__logic.get_player_playing() * -1, " WON")
         self.__logic.reset_board()
