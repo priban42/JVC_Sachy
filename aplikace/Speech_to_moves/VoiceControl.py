@@ -31,7 +31,7 @@ class VoiceControl(threading.Thread):
         #self.engine = pyttsx3.init()
         self.debug = debug
         self.letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8"]
+        self.numbers = ["8", "7", "6", "5", "4", "3", "2", "1"]
         self.data = ()
         self.dataReady = False
         self.runControl = True
@@ -107,7 +107,7 @@ class VoiceControl(threading.Thread):
                 coordinates[0], coordinates[1] = coordinates[1], coordinates[0]
                 numeric_coordinates[0], numeric_coordinates[1] = numeric_coordinates[1], numeric_coordinates[0]
             board_cords = (coordinates[0].upper(), coordinates[1].upper())
-            num_cords = (numeric_coordinates[0], numeric_coordinates[1])
+            num_cords = ((numeric_coordinates[0][1],numeric_coordinates[0][0] ), (numeric_coordinates[1][1], numeric_coordinates[1][0]))
             if self.info:
                 if self.lan == "cs-CZ":
                     print("Byl rozpoznán tah {}".format(board_cords))

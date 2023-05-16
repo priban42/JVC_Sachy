@@ -192,7 +192,7 @@ class ChessGUI(object):
         Initializes speech recognition module and starts new thread
         :return: None
         """
-        self._speech_recog = VoiceControl.VoiceControl(debug=True, info=True, recordTime=4, lan="cs-CZ")
+        self._speech_recog = VoiceControl.VoiceControl(debug=True, info=True, recordTime=4, lan="en-US")
         self._speech_recog.start()
 
     def __init_stockfish(self) -> None:
@@ -271,6 +271,7 @@ class ChessGUI(object):
         """
         if self.__logic.is_valid_move(move, promotion=promotion):
             # play sound
+            print(move)
             self.__play_sound(move, promotion)
             # Do the move
             self.__logic.play_move(move, promotion)
