@@ -38,7 +38,7 @@ class ChessAI(object):
 
     def __init__(self, path: str, depth: int = _DEPTH_DEFAULT,  move_time_ms: int = _MOVE_TIME_DEFAULT):
         self.move_time = move_time_ms
-        self.engine = Stockfish(path, depth, {"Skill level": _SKILL_LEVEL_DEFAULT, "Threads": _THREADS_DEFAULT, "Hash": _HASH_SIZE_DEFAULT})
+        self.engine = Stockfish(path, depth, {"Skill Level": _SKILL_LEVEL_DEFAULT, "Threads": _THREADS_DEFAULT, "Hash": _HASH_SIZE_DEFAULT})
 
     def get_move(self, players_move: str) -> str:
         """
@@ -83,7 +83,7 @@ class ChessAI(object):
         None
         """
 
-        self.engine.update_engine_parameters({"Skill level": skill_level, "Threads": threads, "Hash": hash_size})
+        self.engine.update_engine_parameters({"Skill Level": skill_level, "Threads": threads, "Hash": hash_size})
 
 
 if __name__ == "__main__":

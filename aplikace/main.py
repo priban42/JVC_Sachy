@@ -67,6 +67,8 @@ class ChessGUI(object):
         self.my_color = -1
         self._recently_played_move = ""
         self._recent_promotion = ""
+        self._was_castle = False
+        self._mode = self._PVP
 
     def __load_images(self):
         """
@@ -152,9 +154,11 @@ class ChessGUI(object):
     def __get_row_col(self, x, y):
         return [y // self._RECT_SIZE, x // self._RECT_SIZE]
 
-    def __play_sound(self,move, promotion):
+    def __play_sound(self, move, promotion):
+        self._was_castle = False
         if abs(self.__logic.get_piece(*move[0])) == 6 and abs(self.__logic.get_piece(*move[1])) == 2:
             pygame.mixer.Sound.play(self._CASTLE_MOVE_SOUND)
+            self._was_castle = True
             print("castle")
         elif promotion != "":
             print("promotion")
@@ -197,7 +201,7 @@ class ChessGUI(object):
         :return: None
         """
         self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
-        self._stockfish.set_parameters(200, 1, 512)
+        self._stockfish.set_parameters()
 
     def _eval_player_move(self, event):
         """
@@ -234,14 +238,30 @@ class ChessGUI(object):
                         self._choosing_promotion = False
 
     def _play_stockfish_move(self, move, promotion=""):
+        if self._was_castle:
+            # castle
+            if move[1][1] == 7:
+                move[1][1] = 6
+            elif move[1][1] == 0:
+                move[1][1] = 2
         if move:
             move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
+            print(move)
         else:
             move = self._stockfish.get_move("")
         move = [logic.cmd_to_row_col(move[0:2]), logic.cmd_to_row_col(move[2:4])]
+
         if len(move) == 5:
             promotion = move[4]
         self.play_move(move, promotion)
+
+    def __reset_board(self) -> None:
+        print("PLAYER: ", self.__logic.get_player_playing() * -1, " WON")
+        self.__logic.reset_board()
+        self._recently_played_move = ""
+        self._recent_promotion = ""
+        if self._mode == self._PVAI:
+            self.__init_stockfish()
 
     def play_move(self, move, promotion="") -> None:
         """
@@ -257,10 +277,7 @@ class ChessGUI(object):
             self._recently_played_move = move
             self._recent_promotion = promotion
             if self.__logic.is_checkmate():
-                print("PLAYER: ", self.__logic.get_player_playing() * -1, " WON")
-                self.__logic.reset_board()
-                self._recently_played_move = ""
-                self._recent_promotion = ""
+                self.__reset_board()
             ## TODO: move to commands
             ## TODO: send to serial
 
@@ -281,6 +298,7 @@ class ChessGUI(object):
         pygame.display.set_caption("Speech Chess")
         """ --- SETTINGS SCREEN ---"""
         run = True
+        q = False
         _menu = menu.Menu([self._WIDTH, self._HEIGHT])
         _speech_commands = False
         mode = self._PVP
@@ -291,6 +309,7 @@ class ChessGUI(object):
             for event in events:
                 if event.type == pygame.QUIT:
                     run = False
+                    q = True
             if _menu.update(events):
                 settings = _menu.get_settings()
                 # [1v1, 1vAI, speech_commands]
@@ -307,13 +326,14 @@ class ChessGUI(object):
             pygame.display.flip()
 
         """---- Start speech recog thread"""
+        self._mode = mode
         if _speech_commands:
             self.__init_speech()
         if mode == self._PVAI:
             self.__init_stockfish()
         """---- Main Loop ----"""
         self.draw(win)
-        run = True
+        run = not q
         while run:
             clock.tick(30)
             for event in pygame.event.get():
