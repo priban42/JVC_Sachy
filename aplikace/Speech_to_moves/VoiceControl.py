@@ -28,7 +28,7 @@ class VoiceControl(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.r = sr.Recognizer()
-        #self.engine = pyttsx3.init()
+        self.engine = pyttsx3.init()
         self.debug = debug
         self.letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
         self.numbers = ["8", "7", "6", "5", "4", "3", "2", "1"]
@@ -38,6 +38,7 @@ class VoiceControl(threading.Thread):
         self.recordTime = recordTime
         self.info = info
         self.lan = lan
+        self.canTalk = False
 
     def run(self):
         while self.runControl:
@@ -107,7 +108,7 @@ class VoiceControl(threading.Thread):
                 coordinates[0], coordinates[1] = coordinates[1], coordinates[0]
                 numeric_coordinates[0], numeric_coordinates[1] = numeric_coordinates[1], numeric_coordinates[0]
             board_cords = (coordinates[0].upper(), coordinates[1].upper())
-            num_cords = ((numeric_coordinates[0][1],numeric_coordinates[0][0] ), (numeric_coordinates[1][1], numeric_coordinates[1][0]))
+            num_cords = ((numeric_coordinates[0][1], numeric_coordinates[0][0]), (numeric_coordinates[1][1], numeric_coordinates[1][0]))
             if self.info:
                 if self.lan == "cs-CZ":
                     print("Byl rozpoznán tah {}".format(board_cords))
@@ -138,7 +139,9 @@ class VoiceControl(threading.Thread):
                     else:
                         print("You can speak")
 
+                self.canTalk = True
                 audio = self.r.record(source, duration=self.recordTime)  # Listen for user input
+                self.canTalk = False
 
                 text = self.r.recognize_google(audio, language=self.lan).lower()  # Google text recognition
 
@@ -158,22 +161,25 @@ class VoiceControl(threading.Thread):
         except sr.UnknownValueError:  # Anything else
             print("ERROR: VoiceControl - unknown")
 
-    """def SpeakText(self, command, speed=150):
-        \"""
+    def talkStatus(self):
+        return self.canTalk
+
+    def SpeakText(self, command, speed=150):
+        """
         Text to speech
 
         :param command: String format of text to say
         :param speed: Default 150 | Sets speed of talking
-        \"""
+        """
         self.engine.setProperty('rate', speed)
         self.engine.say(command)
         self.engine.runAndWait()
-"""
+
 
 if __name__ == "__main__":
     # commands in english, can be said anything containing the two coordinates FIRST where we start SECOND where we go
     # E.g. move this from A3 to maybe A4, will return ((0, 2), (0, 3))
-    voice_control = VoiceControl(debug=True, info=True, recordTime=4, lan="cs-CZ")  # initialize
+    voice_control = VoiceControl(debug=True, info=True, recordTime=4, lan="en-US")  # initialize
     voice_control.start()
 
     # sample code
