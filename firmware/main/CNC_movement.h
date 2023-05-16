@@ -20,6 +20,8 @@ class CNC_movement{
     CNC_movement();
     void setOldCoordinates();
     void moveXY();
+    void moveXY_start_acc();
+    void moveXY_end_acc();
     void disableMotors();
     void enableMotors();
     void calibrate();

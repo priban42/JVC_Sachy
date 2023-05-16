@@ -62,6 +62,32 @@ void CNC_movement::moveXY(){
   CNC_Stepper.moveXY();
 }
 
+void CNC_movement::moveXY_start_acc(){
+  CNC_Stepper.set_current_X(current_X);
+  CNC_Stepper.set_current_Y(current_Y);
+  
+  CNC_Stepper.set_next_X(next_X);
+  CNC_Stepper.set_next_Y(next_Y);
+  
+  CNC_Stepper.set_speed(max_Speed);
+  CNC_Stepper.set_acceleration(acceleration);
+  CNC_Stepper.moveXY_start_acc();
+  //CNC_Stepper.moveXY();
+}
+
+void CNC_movement::moveXY_end_acc(){
+  CNC_Stepper.set_current_X(current_X);
+  CNC_Stepper.set_current_Y(current_Y);
+  
+  CNC_Stepper.set_next_X(next_X);
+  CNC_Stepper.set_next_Y(next_Y);
+  
+  CNC_Stepper.set_speed(max_Speed);
+  CNC_Stepper.set_acceleration(acceleration);
+  CNC_Stepper.moveXY_end_acc();
+  //CNC_Stepper.moveXY();
+}
+
 void CNC_movement::calibrate(){
   
   stepperX.setSpeedInStepsPerSecond(80*spmm_X);

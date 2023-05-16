@@ -52,6 +52,20 @@ void Parser::parseNext(Servo servo){
       CNC.next_Y = readValue(byteY) - base_Y;
       CNC.moveXY();
       break;
+    case 9:
+      CNC.setOldCoordinates();
+      CNC.next_X = readValue(byteX) - base_X;
+      CNC.next_Y = readValue(byteY) - base_Y;
+      //CNC.moveXY();
+      CNC.moveXY_end_acc();
+      break;
+    case 10:
+      CNC.setOldCoordinates();
+      CNC.next_X = readValue(byteX) - base_X;
+      CNC.next_Y = readValue(byteY) - base_Y;
+      //CNC.moveXY();
+      CNC.moveXY_start_acc();
+      break;
     case 2:
       CNC.calibrate();
       break;
@@ -74,7 +88,6 @@ void Parser::parseNext(Servo servo){
     case 8://set servo
       int servo_value = readValue(1);
       servo.write(servo_value);
-      
       break;
   }
 

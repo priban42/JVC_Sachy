@@ -75,6 +75,10 @@ class SerialSender:
                 print("debug 42:", response)
         return False
 
+    def wait_for_empty_buffer(self):
+        while self.BufferFilled > 0:
+            self.__clearBuffer()
+
     def send_bytearray(self, msg):
         msg_size = len(msg)
         #print(msg_size)
@@ -87,7 +91,12 @@ class SerialSender:
     def send_move(self, coordinates):
         new_coordinates = self.__coordinates_to_core_XY(coordinates)
         self.send_bytearray(self.__get_packed_coordinates(1, new_coordinates))
-
+    def send_move_end_acc(self, coordinates):
+        new_coordinates = self.__coordinates_to_core_XY(coordinates)
+        self.send_bytearray(self.__get_packed_coordinates(9, new_coordinates))
+    def send_move_start_acc(self, coordinates):
+        new_coordinates = self.__coordinates_to_core_XY(coordinates)
+        self.send_bytearray(self.__get_packed_coordinates(10, new_coordinates))
     def send_bare_command(self, command):
         self.send_bytearray((command).to_bytes(self.COMMAND_SIZE, byteorder='big'))
 
@@ -112,13 +121,30 @@ class SerialSender:
 def main():
     sender = SerialSender('/dev/ttyUSB0')
     sender.send_bare_command(5)
-    sender.send_set_speed(20)
-    sender.send_set_acceleraton(100)
-    sender.send_set_servo(180)
-    #sender.send_move((0, 2))
-    time.sleep(3)
+    sender.send_set_speed(250)
+    sender.send_set_acceleraton(180)
+    #sender.send_set_servo(180)#180 = off
+    sender.send_set_servo(180)  # 180 = off
+    #sender.send_move_end_acc((0, 1))
+    #for x in range(5):
+    #sender.send_move_start_acc((2, 0))
+    #sender.send_move_start_acc((2, 4))
+    #sender.send_move_start_acc((0, 0))
+    sender.send_move((2, 0))
+    sender.send_move((2, 2))
+    sender.send_move((0, 2))
+    sender.send_move((0, 0))
+    sender.send_set_servo(85)#180 = off
+    sender.wait_for_empty_buffer()
+    time.sleep(0.2)
+    sender.send_move((2, 0))
+    sender.send_move((2, 2))
+    sender.send_move((0, 2))
+    sender.send_move((0, 0))
+    sender.send_set_servo(180)  # 180 = off
+    #time.sleep(3)
     #sender.send_move((0, 0))
-    sender.send_set_servo(0)
+    #sender.send_set_servo(100)#100 = on
     #sender.send_move((2, 0))
     #sender.send_move((2, 2))
     #sender.send_move((0, 0))

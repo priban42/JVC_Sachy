@@ -14,6 +14,8 @@ class CNC_stepper{
   public:
     CNC_stepper();
     void moveXY();
+    void moveXY_end_acc();
+    void moveXY_start_acc();
     
     void init();
 
