@@ -1,20 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class Cords:
   def __init__(self, x, y):
    self.x = x
    self.y = y
 
 class MoveToCmds:
-  def __init__(self,cords):
-    self.start_cords = Cords(cords[0][0], cords[0][1])
-    self.final_cords = Cords(cords[1][0], cords[1][1]) 
+  def __init__(self):
+    self.start_cords = Cords(0, 0)
+    self.final_cords = Cords(0, 0) 
     self.chess_status = dict()
-
+    self.shiftL = 0.5
+    self.shiftS = 1
+  
+  def update_cords(self, cords):
+    self.start_cords = Cords(cords[0][0], cords[0][1])
+    self.final_cords = Cords(cords[1][0], cords[1][1])
+  
   def fill_board_status(self):
-    for i in np.arange(0,7.5,0.5):
-     for j in np.arange(0,7.5,0.5):
+    for i in np.arange(0,7.5,self.shiftL):
+     for j in np.arange(0,7.5,self.shiftL):
         self.chess_status[(i,j)] = 0
     return self.chess_status
 
@@ -34,49 +41,49 @@ class MoveToCmds:
     finálních souřadnic a startovních souřadnic
     '''
     if xs >= xf:
-      if xs - 0.5 >= 0:
-        xs -= 0.5
-        if ys + 0.5 <= 7:
-          ys += 0.5
+      if xs - self.shiftL >= 0:
+        xs -= self.shiftL
+        if ys + self.shiftL <= 7:
+          ys += self.shiftL
           sign = '+'
-        elif ys - 0.5 >= 0:
-          ys -= 0.5
+        elif ys - self.shiftL >= 0:
+          ys -= self.shiftL
           sign = '-'
     elif xs <= xf:
-      if xs + 0.5 <= 7:
-        xs += 0.5
-        if ys + 0.5 <= 7:
-          ys += 0.5
+      if xs + self.shiftL <= 7:
+        xs += self.shiftL
+        if ys + self.shiftL <= 7:
+          ys += self.shiftL
           sign = '+'
-        elif ys - 0.5 >= 0:
-          ys -= 0.5
+        elif ys - self.shiftL >= 0:
+          ys -= self.shiftL
           sign = '-'
     path.append((xs,ys))
     '''
     Pohyb po svislých krajích šachovnice
     '''
-    while ys != yf - 0.5 and ys != yf + 0.5:
+    while ys != yf - self.shiftL and ys != yf + self.shiftL:
       if ys < yf:
-        ys += 0.5
+        ys += self.shiftL
       else:
-        ys -= 0.5
+        ys -= self.shiftL
       path.append((xs,ys))
     '''
     Pohyb po horizontálních krajích
     '''
     while xs != xf:
       if xs < xf:
-        xs += 0.5
+        xs += self.shiftL
       else:
-        xs -= 0.5
+        xs -= self.shiftL
       path.append((xs,ys))
     '''
     Na základně předchozího znaménka rozhodne zda je cíl nahoře nebo dole
     '''
     if sign == '+':
-      path.append((xs,ys+0.5))
+      path.append((xs,ys+self.shiftL))
     else:
-      path.append((xs,ys-0.5))
+      path.append((xs,ys-self.shiftL))
     return True, path
 
   def make_path_squares(self):
@@ -91,15 +98,15 @@ class MoveToCmds:
     '''
     while xs != xf or ys != yf:
       xbf = xs
-      if xs < xf and xs + 1 <= 7:
-        xs += 1
-      elif xs > xf and xs - 1 >= 0:
-        xs -= 1
+      if xs < xf and xs + self.shiftS <= 7:
+        xs += self.shiftS
+      elif xs > xf and xs - self.shiftS >= 0:
+        xs -= self.shiftS
       ybf = ys
-      if ys < yf and ys + 1 <= 7:
-        ys += 1
-      elif ys > yf and ys - 1 >= 0:
-        ys -= 1
+      if ys < yf and ys + self.shiftS <= 7:
+        ys += self.shiftS
+      elif ys > yf and ys - self.shiftS >= 0:
+        ys -= self.shiftS
       if self.chess_status[(xs,ys)] == 0:
         path.append((xs,ys))
       elif xs == xf and ys == yf:
@@ -113,14 +120,15 @@ class MoveToCmds:
     if valid:
       return path
     else:
-      valid, path = self.make_path_lines(path, crds)
+      valid, path,  = self.make_path_lines(path, crds)
       if valid:
         return path
       else:
         print("ERROR creating path")
         exit()
 
-  def move(self, board):
+  def move(self, board, cords):
+    self.update_cords(cords)
     self.update_board(board)
     return self.decide()
 
@@ -148,16 +156,18 @@ class MoveToCmds:
 
 
 if __name__ == "__main__":
+  move = MoveToCmds()
   i = 0
   while i < 3:
     if i == 0:
-      board = [(0,2),(4,2),(6,5)]
+      board = [(1,1),(4,2),(6,5)]
+      cords = [(0,5),(4,4)]
     elif i == 2:
       board = [(0,7),(3,3),(3,5)]
+      cords = [(0,0),(5,4)]
     else:
       board = [(1,7),(5,3),(0,5)]
-    cords = [(0,0),(4,4)]
-    move = MoveToCmds(cords)
-    move.print_board(move.move(board))
+      cords = [(2,0),(6,4)]
+    move.print_board(move.move(board,cords))
     i += 1
   
