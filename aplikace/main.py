@@ -4,12 +4,15 @@ from GUI import menu
 from Speech_to_moves import VoiceControl
 from Chess_AI import ChessAI
 from Moves_to_commands import moves_to_commands
-
+from Commands_to_serial import Serial_sender
+import time
 """Test function before chess logic is done"""
 
 promotion_map = {(0, 0): "r", (0, 1): "n", (1, 0): "b", (1, 1): "q"}
 _STOCKFISH_ENGINE_PATH = "/opt/homebrew/bin/stockfish"
-
+_SERIAL_PORT = "/dev/tty.usbserial-1130"
+_SERVO_OFF = 60
+_SERVO_ON = 0
 
 class ChessGUI(object):
     pygame.init()
@@ -88,6 +91,12 @@ class ChessGUI(object):
         self._was_castle = False
         self._mode = self._PVP
         self._move_calc = moves_to_commands.MoveToCmds()
+        self._sender = Serial_sender.SerialSender(_SERIAL_PORT)
+        ## TURN ON MOTORS
+        self._sender.send_bare_command(5)
+        self._sender.send_set_speed(40)
+        self._sender.send_set_acceleraton(180)
+        self._sender.send_set_servo(_SERVO_OFF)  # 180 = off
 
 
     def __load_images(self):
@@ -312,6 +321,17 @@ class ChessGUI(object):
             if self.__logic.is_checkmate():
                 self.__reset_board()
             ## TODO: send to serial
+            for i, coord in enumerate(cnc_coords):
+                if i == 1:
+                    self._sender.send_set_servo(_SERVO_ON)
+                    self._sender.wait_for_empty_buffer()
+                    time.sleep(0.3)
+                self._sender.send_move(coord)
+
+            self._sender.send_set_servo(_SERVO_OFF)
+            self._sender.wait_for_empty_buffer()
+            time.sleep(0.2)
+
 
     def draw(self, win: pygame.Surface) -> None:
         """
@@ -408,6 +428,8 @@ class ChessGUI(object):
                 pos = pygame.mouse.get_pos()
                 self._hover_pos = [pos[0] - self._BOARD_IMG_OFFSET[0], pos[1] - self._BOARD_IMG_OFFSET[1]]
             self.draw(win)
+        self._sender.send_bare_command(4)
+        self._sender.Serial.close()
 
 
 if __name__ == "__main__":
