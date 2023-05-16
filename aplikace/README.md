@@ -20,6 +20,16 @@ Program bude možné ovládat jak myší, tak i hlasem.
 * Co jeden soubor, to jedna class.
 * každou funkci okomentujte a určete datové typy argumentů a výstupu (V angličtině pokud možno)
 
+## USED PACKAGES
+"pip install pygame"
+"pip install stockfish"
+"brew install stockfish / (install stockfish engine)"
+"pip install chess"
+"pip install pyserial"
+"pip install speechrecognition"
+"brew install portaudio / sudo apt-get install python3-pyaudio"
+"pip install pyaudio"
+"pip install pyttsx3"
 
 
 ### DO
