@@ -201,7 +201,7 @@ class ChessGUI(object):
         :return: None
         """
         self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
-        self._stockfish.set_parameters()
+        self._stockfish.set_parameters(skill_level=0)
 
     def _eval_player_move(self, event):
         """
@@ -358,10 +358,17 @@ class ChessGUI(object):
                         pass
                     elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
                         if self.__logic.is_valid_move(move):
+                            print("Voice command valid- playing move: ", move)
                             self.play_move(move)
+                        else:
+                            print("voice command not valid!")
+
                     elif mode == self._PVP:
                         if self.__logic.is_valid_move(move):
+                            print("Voice command valid- playing move: ", move)
                             self.play_move(move)
+                        else:
+                            print("voice command not valid!")
 
             if self._mouse_down:
                 pos = pygame.mouse.get_pos()
