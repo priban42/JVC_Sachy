@@ -10,6 +10,7 @@ Parser parser;
 void setup() {
   Parser parser;
   servo.attach(SERVO_PIN);
+  servo.write(50);
 }
 
 void loop() {

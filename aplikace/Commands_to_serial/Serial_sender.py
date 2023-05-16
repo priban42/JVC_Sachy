@@ -17,14 +17,14 @@ class SerialSender:
     BASE = numpy.array([int((2 ** (8 * COORDINATE_SIZE - 1))), int((2 ** (8 * COORDINATE_SIZE - 1)))])
     THETA = numpy.deg2rad(-45)
     ROTATION_MATRIX = numpy.array([[math.cos(THETA), -math.sin(THETA)], [math.sin(THETA), math.cos(THETA)]])
-    BOARD_SQUARE_SIZE = 36  # in mm
+    BOARD_SQUARE_SIZE = 35.5  # in mm
 
     def __init__(self, device = 'COM6'):
         self.Serial = serial.Serial(device, 115200, timeout=.1)
         time.sleep(2)
         self.BufferQueue = deque()
         self.BufferFilled = 0  # in bytes
-        self.board_square_size = 36  # in mm
+        self.board_square_size = self.BOARD_SQUARE_SIZE  # in mm
 
     def __get_packed_coordinates(self, command: int, coordinates: numpy.ndarray) -> bytearray:
         """
@@ -121,27 +121,27 @@ class SerialSender:
 def main():
     sender = SerialSender('/dev/ttyUSB0')
     sender.send_bare_command(5)
-    sender.send_set_speed(250)
-    sender.send_set_acceleraton(180)
+    sender.send_set_speed(200)
+    sender.send_set_acceleraton(20)
     #sender.send_set_servo(180)#180 = off
-    sender.send_set_servo(180)  # 180 = off
-    #sender.send_move_end_acc((0, 1))
-    #for x in range(5):
-    #sender.send_move_start_acc((2, 0))
-    #sender.send_move_start_acc((2, 4))
-    #sender.send_move_start_acc((0, 0))
-    sender.send_move((2, 0))
-    sender.send_move((2, 2))
-    sender.send_move((0, 2))
-    sender.send_move((0, 0))
-    sender.send_set_servo(85)#180 = off
+    #sender.send_set_servo(180)  # 180 = off
+    #sender.send_move((0, 2))
+    sender.send_set_servo(0)
     sender.wait_for_empty_buffer()
-    time.sleep(0.2)
-    sender.send_move((2, 0))
-    sender.send_move((2, 2))
-    sender.send_move((0, 2))
-    sender.send_move((0, 0))
-    sender.send_set_servo(180)  # 180 = off
+    time.sleep(1)
+    #sender.send_set_servo(50)
+    sender.send_move((0, 5))
+
+
+    #sender.send_move_end_acc((2, 0))
+    #sender.send_set_servo(85)#180 = off
+    #sender.wait_for_empty_buffer()
+    ##time.sleep(0.2)
+    #sender.send_move((2, 0))
+    #sender.send_move((2, 2))
+    #sender.send_move((0, 2))
+    #sender.send_move((0, 0))
+    #sender.send_set_servo(180)  # 180 = off
     #time.sleep(3)
     #sender.send_move((0, 0))
     #sender.send_set_servo(100)#100 = on

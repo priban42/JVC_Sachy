@@ -16,7 +16,7 @@ Parser::Parser(){
   //pinMode(MAGNET_DIR_PIN_1, OUTPUT);
   //pinMode(MAGNET_DIR_PIN_2, OUTPUT);
   //pinMode(MAGNET_PWM_PIN, OUTPUT);
-
+  CNC.disableMotors();
   
 }
 
