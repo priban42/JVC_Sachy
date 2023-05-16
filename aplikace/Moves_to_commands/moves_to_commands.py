@@ -24,10 +24,9 @@ class MoveToCmds:
       self.chess_status[(i,j)] = 1
     return self.chess_status
 
-  def make_path_lines(self):
-    xs, ys = self.start_cords.x, self.start_cords.y
+  def make_path_lines(self, path, crds):
+    xs, ys = crds
     xf, yf = self.final_cords.x, self.final_cords.y
-    path = []
     sign = ''
     path.append((xs,ys))
     '''
@@ -83,16 +82,20 @@ class MoveToCmds:
   def make_path_squares(self):
     xs, ys = self.start_cords.x, self.start_cords.y
     xf, yf = self.final_cords.x, self.final_cords.y
+    xbf = 0
+    ybf = 0
     path = []
     path.append((xs,ys))
     '''
     Pohyb po čtverečkách pokud nemá nic ve svém řádku/sloupci
     '''
     while xs != xf or ys != yf:
+      xbf = xs
       if xs < xf and xs + 1 <= 7:
         xs += 1
       elif xs > xf and xs - 1 >= 0:
         xs -= 1
+      ybf = ys
       if ys < yf and ys + 1 <= 7:
         ys += 1
       elif ys > yf and ys - 1 >= 0:
@@ -102,15 +105,15 @@ class MoveToCmds:
       elif xs == xf and ys == yf:
         path.append((xs,ys))
       else:
-        return False, None
-    return True, path
+        return False, path, (xbf,ybf)
+    return True, path, (xs,ys)
 
   def decide(self):
-    valid, path = self.make_path_squares()
+    valid, path, crds = self.make_path_squares()
     if valid:
       return path
     else:
-      valid, path = self.make_path_lines()
+      valid, path = self.make_path_lines(path, crds)
       if valid:
         return path
       else:
@@ -121,14 +124,17 @@ class MoveToCmds:
     self.update_board(board)
     return self.decide()
 
-  def print_board(self):
+  def print_board(self, path):
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_axes([0.05, 0.05, 1, 1])
     ax.set_xlim(-1, 8)
     ax.set_ylim(-1, 8)
     for j in np.arange(0,7.5,0.5):
       for i in np.arange(0,7.5,0.5):
-        if i%1 == 0 and j%1 == 0 and self.chess_status[(i,j)] != 0:
+        if (i,j) in path:
+          c = 'blue'
+          s = 100
+        elif i%1 == 0 and j%1 == 0 and self.chess_status[(i,j)] != 0:
           c = 'red'
           s = 100
         elif  i%1 == 0 and j%1 == 0:
@@ -142,8 +148,16 @@ class MoveToCmds:
 
 
 if __name__ == "__main__":
-  board = [(0,7),(1,2)]
-  cords = [(0,1),(4,4)]
-  move = MoveToCmds(cords)
-  print(move.move(board))
-  move.print_board()
+  i = 0
+  while i < 3:
+    if i == 0:
+      board = [(0,2),(4,2),(6,5)]
+    elif i == 2:
+      board = [(0,7),(3,3),(3,5)]
+    else:
+      board = [(1,7),(5,3),(0,5)]
+    cords = [(0,0),(4,4)]
+    move = MoveToCmds(cords)
+    move.print_board(move.move(board))
+    i += 1
+  
