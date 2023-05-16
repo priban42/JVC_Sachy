@@ -3,6 +3,7 @@ from Chess_logic import logic
 from GUI import menu
 from Speech_to_moves import VoiceControl
 from Chess_AI import ChessAI
+from Moves_to_commands import moves_to_commands
 
 """Test function before chess logic is done"""
 
@@ -21,7 +22,7 @@ class ChessGUI(object):
 
     _LIGHT_CHESS_COLOR = "#eeeed2"
     _DARK_CHESS_COLOR = "#769656"
-    _BG_COLOR = "#636e72"
+    _BG_COLOR = "#2d3436"
 
     _VIABLE_MOVE_COLOR = (116, 125, 140, 75)
     _VIABLE_MOVE_SURF = pygame.Surface([_RECT_SIZE, _RECT_SIZE], pygame.SRCALPHA)
@@ -47,6 +48,23 @@ class ChessGUI(object):
 
     promotion_x, promotion_y = _WIDTH / 2 - _PIECE_IMG_SIZE * 1.5, _HEIGHT / 2 - _PIECE_IMG_SIZE * 1.5
 
+    _font = pygame.font.SysFont("Arial", 15, False)
+    _font.render("a", True, "White")
+    _letters_surf = pygame.Surface([_WIDTH, 20])
+    _letters_surf.fill("#2d3436")
+    _nums_surf = pygame.Surface([20, _HEIGHT])
+    _nums_surf.fill("#2d3436")
+    _letters = []
+    for i in range(8):
+        _letters.append(_font.render(chr(i + 97), True, "White"))
+    _nums = []
+    for i in range(8):
+        _nums.append(_font.render(str(8 - i), True, "White"))
+    for i, letter in enumerate(_letters):
+        _letters_surf.blit(letter, (i * _WIDTH/8 + _WIDTH/16 - letter.get_width()/2, 10 - letter.get_height() / 2))
+    for i, num in enumerate(_nums):
+        _nums_surf.blit(num, (10 - num.get_width() / 2, i * _HEIGHT/8 + _HEIGHT/16 - num.get_height()/2))
+
     def __init__(self):
         """---------- VISUAL STUFF --------"""
         self._PROMOTION_POPUP_WHITE = pygame.Surface([3 * self._PIECE_IMG_SIZE, 3 * self._PIECE_IMG_SIZE])
@@ -69,6 +87,8 @@ class ChessGUI(object):
         self._recent_promotion = ""
         self._was_castle = False
         self._mode = self._PVP
+        self._move_calc = moves_to_commands.MoveToCmds()
+
 
     def __load_images(self):
         """
@@ -255,6 +275,16 @@ class ChessGUI(object):
             promotion = move[4]
         self.play_move(move, promotion)
 
+    def _get_coords(self, move):
+        full_squares = []
+        for row in range(8):
+            for col in range(8):
+                if self.__logic.get_piece(row, col) != 0:
+                    full_squares.append([col, 7 - row])
+        move = [[move[0][1], 7 - move[0][0]], [move[1][1], 7 - move[1][0]]]
+        print(move)
+        return self._move_calc.move(full_squares, move)
+
     def __reset_board(self) -> None:
         print("PLAYER: ", self.__logic.get_player_playing() * -1, " WON")
         self.__logic.reset_board()
@@ -274,13 +304,15 @@ class ChessGUI(object):
             print(move)
             self.__play_sound(move, promotion)
             # Do the move
+            cnc_coords = self._get_coords(move)
+            print("coords:", cnc_coords)
             self.__logic.play_move(move, promotion)
             self._recently_played_move = move
             self._recent_promotion = promotion
             if self.__logic.is_checkmate():
                 self.__reset_board()
-            ## TODO: move to commands
             ## TODO: send to serial
+
 
     def draw(self, win: pygame.Surface) -> None:
         """
@@ -291,11 +323,13 @@ class ChessGUI(object):
         win.fill(self._BG_COLOR)
         self.__draw_chess_board(self.chess_board)
         win.blit(self.chess_board, [0, 0])
+        win.blit(self._letters_surf, [0, 480])
+        win.blit(self._nums_surf, [480, 0])
         pygame.display.flip()
 
     def main(self) -> None:
         """---- SETUP ----"""
-        win = pygame.display.set_mode((self._WIDTH, self._HEIGHT))
+        win = pygame.display.set_mode((self._WIDTH + 20, self._HEIGHT + 20))
         pygame.display.set_caption("Speech Chess")
         """ --- SETTINGS SCREEN ---"""
         run = True
@@ -322,8 +356,8 @@ class ChessGUI(object):
                 _speech_commands = settings[2]
                 if mode:
                     run = False
-
-            win.blit(_menu.screen, [0, 0])
+            win.fill("#2d3436")
+            win.blit(_menu.screen, [10, 10])
             pygame.display.flip()
 
         """---- Start speech recog thread"""

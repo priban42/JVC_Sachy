@@ -44,6 +44,7 @@ class Menu(object):
         self._init_buttons()
         self._title = self._font_title.render("CHESS", True, "#f5f6fa")
         self.draw()
+        self.offset = [10, 10]
 
     def _init_buttons(self):
         self.buttons.append(Button("Player vs Player", pygame.Rect(
@@ -69,6 +70,7 @@ class Menu(object):
         for e in events:
             if e.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
+                pos = [pos[0] - self.offset[0], pos[1] - self.offset[1]]
                 for i, btn in enumerate(self.buttons):
                     if btn.collide(pos):
                         if i == 0:
