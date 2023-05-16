@@ -1,12 +1,13 @@
 #ifndef Parser_h
 #define Parser_h
 #include <Arduino.h>
+#include <Servo.h>
 
 class Parser{
   
   public:
     Parser();
-    void parseNext();
+    void parseNext(Servo servo);
 
     unsigned long start;
     

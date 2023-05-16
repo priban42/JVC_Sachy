@@ -72,12 +72,12 @@ class SerialSender:
                 return True
             elif serVstup == (42).to_bytes(1, byteorder='big'):
                 response = self.Serial.readline().decode('UTF-8').rstrip()
-                print(response)
+                print("debug 42:", response)
         return False
 
     def send_bytearray(self, msg):
         msg_size = len(msg)
-        print(msg_size)
+        #print(msg_size)
         while self.BufferFilled + msg_size > self.BUFFER_SIZE:
             self.__clearBuffer()
         self.Serial.write(msg)
@@ -102,15 +102,26 @@ class SerialSender:
         msg.extend(int(acceleration*2**(0.5)).to_bytes(self.ACCELERATION_SIZE, byteorder='big'))
         self.send_bytearray(msg)
 
+    def send_set_servo(self, strength):  # strength int between 0 and 180
+        msg = bytearray()
+        msg.extend((8).to_bytes(self.COMMAND_SIZE, byteorder='big'))
+        msg.extend((strength).to_bytes(1, byteorder='big'))
+        self.send_bytearray(msg)
+
 
 def main():
-    sender = SerialSender('COM7')
+    sender = SerialSender('/dev/ttyUSB0')
     sender.send_bare_command(5)
-    sender.send_set_speed(400)
-    sender.send_set_acceleraton(500)
-    for a in range(8):
-        sender.send_move((6, 6))
-        sender.send_move((0, 0))
+    sender.send_set_speed(20)
+    sender.send_set_acceleraton(100)
+    sender.send_set_servo(180)
+    #sender.send_move((0, 2))
+    time.sleep(3)
+    #sender.send_move((0, 0))
+    sender.send_set_servo(0)
+    #sender.send_move((2, 0))
+    #sender.send_move((2, 2))
+    #sender.send_move((0, 0))
     sender.send_bare_command(4)
 
 

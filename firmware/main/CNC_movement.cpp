@@ -21,8 +21,8 @@ CNC_movement::CNC_movement(){
 
   pinMode(enableXY, OUTPUT);
 
-  pinMode(limit_switch_X, INPUT);
-  pinMode(limit_switch_Y, INPUT);
+  //pinMode(limit_switch_X, INPUT);
+  //pinMode(limit_switch_Y, INPUT);
 }
 
 void CNC_movement::disableMotors(){

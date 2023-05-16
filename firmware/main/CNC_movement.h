@@ -11,7 +11,7 @@
 
 #define enableXY 8
 
-#define limit_switch_X 9 
+#define limit_switch_X 11 
 #define limit_switch_Y 10
 
 class CNC_movement{

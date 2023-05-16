@@ -2,11 +2,22 @@
 #include "Parser.h"
 #include "CNC_movement.h"
 
+
+//#define MAGNET_DIR_PIN_1 12
+//#define MAGNET_DIR_PIN_2 13
+//#define MAGNET_PWM_PIN 9
+
+
 CNC_movement CNC;
 
 Parser::Parser(){
   Serial.begin(115200);
   CNC_movement CNC;
+  //pinMode(MAGNET_DIR_PIN_1, OUTPUT);
+  //pinMode(MAGNET_DIR_PIN_2, OUTPUT);
+  //pinMode(MAGNET_PWM_PIN, OUTPUT);
+
+  
 }
 
 byte Parser::readByteSafe(){//waits until a byte arrives to buffer, than returns it
@@ -30,7 +41,7 @@ void Parser::sendInt(int cislo){
   Serial.write(byte(cislo%256));
 }
   
-void Parser::parseNext(){
+void Parser::parseNext(Servo servo){
   byte command = readValue(byteC);
   //Serial.write(42);
   //Serial.println(command);
@@ -59,6 +70,11 @@ void Parser::parseNext(){
       break;
     case 7://set acceleration
       CNC.acceleration = float(readValue(byteA));
+      break;
+    case 8://set servo
+      int servo_value = readValue(1);
+      servo.write(servo_value);
+      
       break;
   }
 
