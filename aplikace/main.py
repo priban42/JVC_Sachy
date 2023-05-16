@@ -313,6 +313,7 @@ class ChessGUI(object):
                 self.__reset_board()
             ## TODO: send to serial
 
+
     def draw(self, win: pygame.Surface) -> None:
         """
         Draws chess board to win
