@@ -35,7 +35,7 @@ class MoveToCmds:
     xs, ys = crds
     xf, yf = self.final_cords.x, self.final_cords.y
     sign = ''
-    path.append((xs,ys))
+    #path.append((xs,ys))
     '''
     Rozhodne jakým směrem půjde na základě vzdálenosti 
     finálních souřadnic a startovních souřadnic
