@@ -40,7 +40,7 @@ class Menu(object):
         self.screen = pygame.Surface(self.WIN_SIZE)
         self.buttons = []
         self._btn_width = round(self.WIN_SIZE[0] / 2)
-        self._btn_height = round(self.WIN_SIZE[0] / 8)
+        self._btn_height = round(self.WIN_SIZE[0] / 12)
         self._init_buttons()
         self._title = self._font_title.render("CHESS", True, "#f5f6fa")
         self.draw()
@@ -52,11 +52,18 @@ class Menu(object):
         self.buttons.append(Button("Player vs AI", pygame.Rect(
             [self.WIN_SIZE[0] / 2 - self._btn_width / 2, 130 + 1.5 * self._btn_height,
              self._btn_width, self._btn_height])))
-        self.buttons.append(Button("Speech commands: OFF", pygame.Rect(
+        self.buttons.append(Button("AI vs AI", pygame.Rect(
             [self.WIN_SIZE[0] / 2 - self._btn_width / 2, 130 + 3 * self._btn_height,
              self._btn_width, self._btn_height])))
+        self.buttons.append(Button("Speech commands: OFF", pygame.Rect(
+            [self.WIN_SIZE[0] / 2 - self._btn_width / 2, 130 + 4.5 * self._btn_height,
+             self._btn_width, self._btn_height])))
+        self.buttons.append(Button("Serial comm: ON", pygame.Rect(
+            [self.WIN_SIZE[0] / 2 - self._btn_width / 2, 130 + 6 * self._btn_height,
+             self._btn_width, self._btn_height])))
+        self.buttons[4].is_clicked = True
         self.buttons.append(
-            Button("PLAY", pygame.Rect([self.WIN_SIZE[0] / 2 - self._btn_width / 2, 130 + 4.5 * self._btn_height,
+            Button("PLAY", pygame.Rect([self.WIN_SIZE[0] / 2 - self._btn_width / 2, 130 + 7.5 * self._btn_height,
                                         self._btn_width, self._btn_height])))
 
     def draw(self):
@@ -73,25 +80,25 @@ class Menu(object):
                 pos = [pos[0] - self.offset[0], pos[1] - self.offset[1]]
                 for i, btn in enumerate(self.buttons):
                     if btn.collide(pos):
-                        if i == 0:
+                        if i in [0, 1, 2]:
                             btn.is_clicked = not btn.is_clicked
-                            if btn.is_clicked:
-                                self.buttons[i + 1].is_clicked = False
-                        elif i == 1:
-                            btn.is_clicked = not btn.is_clicked
-                            if btn.is_clicked:
-                                self.buttons[i - 1].is_clicked = False
-                        elif i == 2:
+                            for b in [0, 1, 2]:
+                                if b != i:
+                                    self.buttons[b].is_clicked = False
+                        elif i == 3:
                             btn.is_clicked = not btn.is_clicked
                             btn.change_text("Speech commands: " + ("ON" if btn.is_clicked else "OFF"))
-                        elif i == 3:
+                        elif i == 4:
+                            btn.is_clicked = not btn.is_clicked
+                            btn.change_text("Serial comm: " + ("ON" if btn.is_clicked else "OFF"))
+                        elif i == 5:
                             btn.is_clicked = True
                             play = True
                         self.draw()
         return play
 
     def get_settings(self):
-        return [self.buttons[i].is_clicked for i in range(3)]
+        return [self.buttons[i].is_clicked for i in range(5)]
 
 
 if __name__ == "__main__":

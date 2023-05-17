@@ -6,6 +6,7 @@ from Chess_AI import ChessAI
 from Moves_to_commands import moves_to_commands
 from Commands_to_serial import Serial_sender
 import time
+
 """Test function before chess logic is done"""
 
 promotion_map = {(0, 0): "r", (0, 1): "n", (1, 0): "b", (1, 1): "q"}
@@ -13,6 +14,28 @@ _STOCKFISH_ENGINE_PATH = "/opt/homebrew/bin/stockfish"
 _SERIAL_PORT = "/dev/tty.usbserial-1130"
 _SERVO_OFF = 60
 _SERVO_ON = 0
+
+# HARDCODED CASTLE MOVES 0 - WHITE SHORT CASTLE, 1 - WHITE LONG, 2 - BLACK SHORT, 3 - BLACK LONG
+_CASTLE_MOVES = [[[(7, 0), (6.5, 0.5), (6.5, 1)], [(4, 0), (6, 0)], [(6.5, 1), (6.5, 0.5), (5, 0.5), (5, 0)]],
+                 # WHITE SHORT CASLTE
+                 [[(0, 0), (0.5, 0.5), (0.5, 1)], [(4, 0), (2, 0)], [(0.5, 1), (0.5, 0.5), (3, 0.5), (3, 0)]],
+                 # WHITE LONG CASTLE
+                 [[(7, 7), (6.5, 6.5), (6.5, 6)], [(4, 7), (6, 7)], [(6.5, 6), (6.5, 6.5), (5, 6.5), (5, 7)]],
+                 # BLACK SHORT CASTLE
+                 [[(0, 7), (0.5, 6.5), (0.5, 6)], [(4, 7), (2, 7)], [(0.5, 6), (0.5, 6.5), (3, 6.5), (3, 7)]],
+                 # BLACK LONG CASTLE
+                 ]
+
+_WHITE_SHORT = 0
+_WHITE_LONG = 1
+_BLACK_SHORT = 2
+_BLACK_LONG = 3
+_SERVO_WAIT = 0.3
+_MOTOR_SPEED = 200
+_MOTOR_ACCEL = 180
+_MOTORS_ON = 5
+_MOTOR_OFF = 4
+
 
 class ChessGUI(object):
     pygame.init()
@@ -48,6 +71,7 @@ class ChessGUI(object):
     """--- GAME MODES ---"""
     _PVP = 1
     _PVAI = 2
+    _AIVAI = 3
 
     promotion_x, promotion_y = _WIDTH / 2 - _PIECE_IMG_SIZE * 1.5, _HEIGHT / 2 - _PIECE_IMG_SIZE * 1.5
 
@@ -64,9 +88,10 @@ class ChessGUI(object):
     for i in range(8):
         _nums.append(_font.render(str(8 - i), True, "White"))
     for i, letter in enumerate(_letters):
-        _letters_surf.blit(letter, (i * _WIDTH/8 + _WIDTH/16 - letter.get_width()/2, 10 - letter.get_height() / 2))
+        _letters_surf.blit(letter,
+                           (i * _WIDTH / 8 + _WIDTH / 16 - letter.get_width() / 2, 10 - letter.get_height() / 2))
     for i, num in enumerate(_nums):
-        _nums_surf.blit(num, (10 - num.get_width() / 2, i * _HEIGHT/8 + _HEIGHT/16 - num.get_height()/2))
+        _nums_surf.blit(num, (10 - num.get_width() / 2, i * _HEIGHT / 8 + _HEIGHT / 16 - num.get_height() / 2))
 
     def __init__(self):
         """---------- VISUAL STUFF --------"""
@@ -89,15 +114,13 @@ class ChessGUI(object):
         self._recently_played_move = ""
         self._recent_promotion = ""
         self._was_castle = False
+        self._castle_type = 0
+        self._was_capture = False
+        self._captured_pos = None
         self._mode = self._PVP
         self._move_calc = moves_to_commands.MoveToCmds()
-        self._sender = Serial_sender.SerialSender(_SERIAL_PORT)
-        ## TURN ON MOTORS
-        self._sender.send_bare_command(5)
-        self._sender.send_set_speed(40)
-        self._sender.send_set_acceleraton(180)
-        self._sender.send_set_servo(_SERVO_OFF)  # 180 = off
-
+        self._sender = None
+        self._use_serial = False
 
     def __load_images(self):
         """
@@ -183,22 +206,43 @@ class ChessGUI(object):
     def __get_row_col(self, x, y):
         return [y // self._RECT_SIZE, x // self._RECT_SIZE]
 
-    def __play_sound(self, move, promotion):
+    def __detect_special_moves(self, move, promotion):
         self._was_castle = False
-        if abs(self.__logic.get_piece(*move[0])) == 6 and abs(self.__logic.get_piece(*move[1])) == 2:
-            pygame.mixer.Sound.play(self._CASTLE_MOVE_SOUND)
+        self._was_capture = False
+        move_start_piece = self.__logic.get_piece(*move[0])
+        move_end_piece = self.__logic.get_piece(*move[1])
+        dr, dc = move[0][0] - move[1][0], move[0][1] - move[1][1]
+        # castle detection
+        if abs(move_start_piece) == 6 and (abs(dr) > 1 or abs(dc) > 1):
             self._was_castle = True
-            print("castle")
-        elif promotion != "":
-            print("promotion")
-            pygame.mixer.Sound.play(self._PROMOTION_MOVE_SOUND)
+            if logic.sign(move_start_piece) == -1:  # white
+                if move[1][1] < 3:
+                    self._castle_type = _WHITE_LONG  # long
+                elif move[1][1] > 5:
+                    self._castle_type = _WHITE_SHORT  # short
+            else:  # black
+                if move[1][1] < 3:
+                    self._castle_type = _BLACK_LONG  # long
+                elif move[1][1] > 5:
+                    self._castle_type = _BLACK_SHORT  # short
+        # en passant detection
+        elif abs(move_start_piece) == 1 and dc != 0 and move_end_piece == 0:
+            self._was_capture = True
+            self._captured_pos = move[1]
         else:
-            if self.__logic.get_piece(*move[1]) != 0:
-                print("capture")
-                pygame.mixer.Sound.play(self._CAPTURE_MOVE_SOUND)
-            else:
-                print("normal")
-                pygame.mixer.Sound.play(self._NORMAL_MOVE_SOUND)
+            if move_end_piece != 0:
+                self._was_capture = True
+                self._captured_pos = move[1]
+
+    def __play_sound(self, promotion):
+        if self._was_castle:
+            pygame.mixer.Sound.play(self._CASTLE_MOVE_SOUND)
+        elif promotion != "":
+            pygame.mixer.Sound.play(self._PROMOTION_MOVE_SOUND)
+        elif self._was_capture:
+            pygame.mixer.Sound.play(self._CAPTURE_MOVE_SOUND)
+        else:
+            pygame.mixer.Sound.play(self._NORMAL_MOVE_SOUND)
 
     def _determine_move(self):
         new_row, new_col = self.__get_row_col(*self._hover_pos)
@@ -231,6 +275,17 @@ class ChessGUI(object):
         """
         self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
         self._stockfish.set_parameters(skill_level=0)
+
+    def __init_serial(self) -> None:
+        """
+        Init serial obj for sending data over serial
+        :return:
+        """
+        Serial_sender.SerialSender(_SERIAL_PORT)
+        self._sender.send_bare_command(_MOTORS_ON)
+        self._sender.send_set_speed(_MOTOR_SPEED)
+        self._sender.send_set_acceleraton(_MOTOR_ACCEL)
+        self._sender.send_set_servo(_SERVO_OFF)
 
     def _eval_player_move(self, event):
         """
@@ -275,7 +330,6 @@ class ChessGUI(object):
                 move[1][1] = 2
         if move:
             move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
-            print(move)
         else:
             move = self._stockfish.get_move("")
         move = [logic.cmd_to_row_col(move[0:2]), logic.cmd_to_row_col(move[2:4])]
@@ -291,7 +345,6 @@ class ChessGUI(object):
                 if self.__logic.get_piece(row, col) != 0:
                     full_squares.append([col, 7 - row])
         move = [[move[0][1], 7 - move[0][0]], [move[1][1], 7 - move[1][0]]]
-        print(move)
         return self._move_calc.move(full_squares, move)
 
     def __reset_board(self) -> None:
@@ -302,6 +355,47 @@ class ChessGUI(object):
         if self._mode == self._PVAI:
             self.__init_stockfish()
 
+    def _serial_capture(self):
+        """
+        Sends capture commands over serial
+        :return:
+        """
+        move_recalc = (self._captured_pos[1], 7 - self._captured_pos[0])
+        if move_recalc[1] > 3:
+            dy = -0.5
+        else:
+            dy = 0.5
+        if move_recalc[0] > 3:
+            final_x = 0
+        else:
+            final_x = 7
+        self._sender.send_move(move_recalc)
+        self._sender.send_set_servo(_SERVO_ON)
+        self._sender.wait_for_empty_buffer()
+        time.sleep(_SERVO_WAIT)
+        self._sender.send_move((move_recalc[0], move_recalc[1] + dy))
+        # TODO: special capture command, currently only normal move
+        self._sender.send_move((final_x, move_recalc[1] + dy))
+        self._sender.send_set_servo(_SERVO_OFF)
+        self._sender.wait_for_empty_buffer()
+        time.sleep(_SERVO_WAIT)
+
+    def _serial_castle(self):
+        """
+        Sends castle commands over serials
+        :return:
+        """
+        for command_sequence in _CASTLE_MOVES[self._castle_type]:
+            for i, command in enumerate(command_sequence):
+                if i == 1:
+                    self._sender.send_set_servo(_SERVO_ON)
+                    self._sender.wait_for_empty_buffer()
+                    time.sleep(_SERVO_WAIT)
+                self._sender.send_move(command)
+            self._sender.send_set_servo(_SERVO_OFF)
+            self._sender.wait_for_empty_buffer()
+            time.sleep(_SERVO_WAIT)
+
     def play_move(self, move, promotion="") -> None:
         """
         Plays move and handles all of the logic (sending to Arduino, updating board etc...)
@@ -310,28 +404,36 @@ class ChessGUI(object):
         """
         if self.__logic.is_valid_move(move, promotion=promotion):
             # play sound
-            print(move)
-            self.__play_sound(move, promotion)
+            self.__detect_special_moves(move, promotion)
+            self.__play_sound(promotion)
+            if self._use_serial:
+                cnc_coords = []
+                if self._was_capture:
+                    print("Capture move")
+                    self._serial_capture()
+                    cnc_coords = self._get_coords(move)
+                elif self._was_castle:
+                    print("Castle move: ", self._castle_type)
+                    self._serial_castle()
+
+                if cnc_coords:
+                    for i, coord in enumerate(cnc_coords):
+                        if i == 1:
+                            self._sender.send_set_servo(_SERVO_ON)
+                            self._sender.wait_for_empty_buffer()
+                            time.sleep(_SERVO_WAIT)
+                        self._sender.send_move(coord)
+
+                    self._sender.send_set_servo(_SERVO_OFF)
+                    self._sender.wait_for_empty_buffer()
+                    time.sleep(_SERVO_WAIT)
+
             # Do the move
-            cnc_coords = self._get_coords(move)
-            print("coords:", cnc_coords)
             self.__logic.play_move(move, promotion)
             self._recently_played_move = move
             self._recent_promotion = promotion
             if self.__logic.is_checkmate():
                 self.__reset_board()
-            ## TODO: send to serial
-            for i, coord in enumerate(cnc_coords):
-                if i == 1:
-                    self._sender.send_set_servo(_SERVO_ON)
-                    self._sender.wait_for_empty_buffer()
-                    time.sleep(0.3)
-                self._sender.send_move(coord)
-
-            self._sender.send_set_servo(_SERVO_OFF)
-            self._sender.wait_for_empty_buffer()
-            time.sleep(0.2)
-
 
     def draw(self, win: pygame.Surface) -> None:
         """
@@ -355,6 +457,7 @@ class ChessGUI(object):
         q = False
         _menu = menu.Menu([self._WIDTH, self._HEIGHT])
         _speech_commands = False
+        _serial_comm = False
         mode = self._PVP
         clock = pygame.time.Clock()
         while run:
@@ -368,12 +471,13 @@ class ChessGUI(object):
                 settings = _menu.get_settings()
                 # [1v1, 1vAI, speech_commands]
                 mode = None
-                if settings[0]:
-                    mode = self._PVP
-                elif settings[1]:
-                    mode = self._PVAI
-                _speech_commands = settings[2]
-                if mode:
+                for i in range(3):
+                    if settings[i]:
+                        mode = i + 1
+
+                _speech_commands = settings[3]
+                _serial_comm = settings[4]
+                if mode is not None:
                     run = False
             win.fill("#2d3436")
             win.blit(_menu.screen, [10, 10])
@@ -383,10 +487,12 @@ class ChessGUI(object):
         self._mode = mode
         if _speech_commands:
             self.__init_speech()
-        if mode == self._PVAI:
+        if mode == self._PVAI or self._AIVAI:
             self.__init_stockfish()
+        if _serial_comm:
+            self.__init_serial()
+            self._use_serial = True
         """---- Main Loop ----"""
-        self.draw(win)
         run = not q
         while run:
             clock.tick(30)
@@ -397,13 +503,18 @@ class ChessGUI(object):
                         self._speech_recog.runControl = False
                         self._speech_recog.join(1)
 
-                if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                if (mode == self._PVAI and self.__logic.get_player_playing() != self.my_color) or mode == self._AIVAI:
                     pass
                 else:
                     self._eval_player_move(event)
 
             if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
                 self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
+
+            #TODO: not working yet
+            if mode == self._AIVAI:
+                pass
+                #self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
 
             if _speech_commands:
                 if self._speech_recog.dataReady:
@@ -428,8 +539,10 @@ class ChessGUI(object):
                 pos = pygame.mouse.get_pos()
                 self._hover_pos = [pos[0] - self._BOARD_IMG_OFFSET[0], pos[1] - self._BOARD_IMG_OFFSET[1]]
             self.draw(win)
-        self._sender.send_bare_command(4)
-        self._sender.Serial.close()
+
+        if self._use_serial:
+            self._sender.send_bare_command(4)
+            self._sender.Serial.close()
 
 
 if __name__ == "__main__":
