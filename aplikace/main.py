@@ -110,6 +110,7 @@ class ChessGUI(object):
         self.valid_moves = []
         self._speech_recog = None
         self._stockfish = None
+        self._stockfish2 = None
         self.my_color = -1
         self._recently_played_move = ""
         self._recent_promotion = ""
@@ -121,6 +122,7 @@ class ChessGUI(object):
         self._move_calc = moves_to_commands.MoveToCmds()
         self._sender = None
         self._use_serial = False
+        self.game_ended = False
 
     def __load_images(self):
         """
@@ -268,13 +270,17 @@ class ChessGUI(object):
         self._speech_recog = VoiceControl.VoiceControl(debug=True, info=True, recordTime=4, lan="en-US")
         self._speech_recog.start()
 
-    def __init_stockfish(self) -> None:
+    def __init_stockfish(self, stockfish=1) -> None:
         """
         Initializes stockfish engine and sets parameters
         :return: None
         """
-        self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
-        self._stockfish.set_parameters(skill_level=0)
+        if stockfish == 1:
+            self._stockfish = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
+            self._stockfish.set_parameters(skill_level=0)
+        elif stockfish == 2:
+            self._stockfish2 = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
+            self._stockfish.set_parameters(skill_level=1)
 
     def __init_serial(self) -> None:
         """
@@ -321,22 +327,31 @@ class ChessGUI(object):
                         self.play_move(self._promotion_move, chosen_promotion)
                         self._choosing_promotion = False
 
-    def _play_stockfish_move(self, move, promotion=""):
+    def _play_stockfish_move(self, move, promotion="", stockfish=1):
         if self._was_castle:
             # castle
             if move[1][1] == 7:
                 move[1][1] = 6
             elif move[1][1] == 0:
                 move[1][1] = 2
-        if move:
-            move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
-        else:
-            move = self._stockfish.get_move("")
-        move = [logic.cmd_to_row_col(move[0:2]), logic.cmd_to_row_col(move[2:4])]
+
+        if stockfish == 1:
+            if move:
+                move = self._stockfish.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
+            else:
+                move = self._stockfish.get_move("")
+        elif stockfish == 2:
+            if move:
+                move = self._stockfish2.get_move(logic.row_col_to_cmd(*move[0]) + logic.row_col_to_cmd(*move[1]) + promotion)
+            else:
+                move = self._stockfish2.get_move("")
+        move_rc = [logic.cmd_to_row_col(move[0:2]), logic.cmd_to_row_col(move[2:4])]
 
         if len(move) == 5:
             promotion = move[4]
-        self.play_move(move, promotion)
+        else:
+            promotion = ""
+        self.play_move(move_rc, promotion)
 
     def _get_coords(self, move):
         full_squares = []
@@ -354,6 +369,9 @@ class ChessGUI(object):
         self._recent_promotion = ""
         if self._mode == self._PVAI:
             self.__init_stockfish()
+        if self._mode == self._AIVAI:
+            self.__init_stockfish(1)
+            self.__init_stockfish(2)
 
     def _serial_capture(self):
         """
@@ -433,7 +451,11 @@ class ChessGUI(object):
             self._recently_played_move = move
             self._recent_promotion = promotion
             if self.__logic.is_checkmate():
-                self.__reset_board()
+                print("PLAYER: ", "BLACK" if self.__logic.get_player_playing() * -1 == 1 else "WHITE", " WON")
+                self.game_ended = True
+                #self.__reset_board()
+        else:
+            print("Move not valid:", move, promotion)
 
     def draw(self, win: pygame.Surface) -> None:
         """
@@ -487,8 +509,11 @@ class ChessGUI(object):
         self._mode = mode
         if _speech_commands:
             self.__init_speech()
-        if mode == self._PVAI or self._AIVAI:
+        if mode == self._PVAI:
             self.__init_stockfish()
+        elif mode == self._AIVAI:
+            self.__init_stockfish(1)
+            self.__init_stockfish(2)
         if _serial_comm:
             self.__init_serial()
             self._use_serial = True
@@ -502,43 +527,46 @@ class ChessGUI(object):
                     if _speech_commands:
                         self._speech_recog.runControl = False
                         self._speech_recog.join(1)
-
-                if (mode == self._PVAI and self.__logic.get_player_playing() != self.my_color) or mode == self._AIVAI:
-                    pass
-                else:
-                    self._eval_player_move(event)
-
-            if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
-                self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
-
-            #TODO: not working yet
-            if mode == self._AIVAI:
-                pass
-                #self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
-
-            if _speech_commands:
-                if self._speech_recog.dataReady:
-                    move = self._speech_recog.read_data()
-                    if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                if not self.game_ended:
+                    if (mode == self._PVAI and self.__logic.get_player_playing() != self.my_color) or mode == self._AIVAI:
                         pass
-                    elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
-                        if self.__logic.is_valid_move(move):
-                            print("Voice command valid- playing move: ", move)
-                            self.play_move(move)
-                        else:
-                            print("voice command not valid!")
+                    else:
+                        self._eval_player_move(event)
 
-                    elif mode == self._PVP:
-                        if self.__logic.is_valid_move(move):
-                            print("Voice command valid- playing move: ", move)
-                            self.play_move(move)
-                        else:
-                            print("voice command not valid!")
+            if not self.game_ended:
 
-            if self._mouse_down:
-                pos = pygame.mouse.get_pos()
-                self._hover_pos = [pos[0] - self._BOARD_IMG_OFFSET[0], pos[1] - self._BOARD_IMG_OFFSET[1]]
-            self.draw(win)
+                if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                    self._play_stockfish_move(self._recently_played_move, self._recent_promotion)
+
+                if mode == self._AIVAI:
+                    if self.__logic.get_player_playing() == self.my_color:
+                        self._play_stockfish_move(self._recently_played_move, self._recent_promotion, 1)
+                    else:
+                        self._play_stockfish_move(self._recently_played_move, self._recent_promotion, 2)
+
+                if _speech_commands:
+                    if self._speech_recog.dataReady:
+                        move = self._speech_recog.read_data()
+                        if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                            pass
+                        elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
+                            if self.__logic.is_valid_move(move):
+                                print("Voice command valid- playing move: ", move)
+                                self.play_move(move)
+                            else:
+                                print("voice command not valid!")
+
+                        elif mode == self._PVP:
+                            if self.__logic.is_valid_move(move):
+                                print("Voice command valid- playing move: ", move)
+                                self.play_move(move)
+                            else:
+                                print("voice command not valid!")
+
+                if self._mouse_down:
+                    pos = pygame.mouse.get_pos()
+                    self._hover_pos = [pos[0] - self._BOARD_IMG_OFFSET[0], pos[1] - self._BOARD_IMG_OFFSET[1]]
+                self.draw(win)
 
         if self._use_serial:
             self._sender.send_bare_command(4)
