@@ -13,7 +13,6 @@ class MoveToCmds:
     self.final_cords = Cords(0, 0) 
     self.chess_status = dict()
     self.shiftL = 0.5
-    self.shiftS = 1
   
   def update_cords(self, cords):
     self.start_cords = Cords(cords[0][0], cords[0][1])
@@ -35,7 +34,6 @@ class MoveToCmds:
     xs, ys = crds
     xf, yf = self.final_cords.x, self.final_cords.y
     sign = ''
-    #path.append((xs,ys))
     '''
     Rozhodne jakým směrem půjde na základě vzdálenosti 
     finálních souřadnic a startovních souřadnic
@@ -98,15 +96,15 @@ class MoveToCmds:
     '''
     while xs != xf or ys != yf:
       xbf = xs
-      if xs < xf and xs + self.shiftS <= 7:
-        xs += self.shiftS
-      elif xs > xf and xs - self.shiftS >= 0:
-        xs -= self.shiftS
+      if xs < xf and xs + self.shiftL <= 7:
+        xs += self.shiftL
+      elif xs > xf and xs - self.shiftL >= 0:
+        xs -= self.shiftL
       ybf = ys
-      if ys < yf and ys + self.shiftS <= 7:
-        ys += self.shiftS
-      elif ys > yf and ys - self.shiftS >= 0:
-        ys -= self.shiftS
+      if ys < yf and ys + self.shiftL <= 7:
+        ys += self.shiftL
+      elif ys > yf and ys - self.shiftL >= 0:
+        ys -= self.shiftL
       if self.chess_status[(xs,ys)] == 0:
         path.append((xs,ys))
       elif xs == xf and ys == yf:
@@ -118,10 +116,12 @@ class MoveToCmds:
   def decide(self):
     valid, path, crds = self.make_path_squares()
     if valid:
+      print(path)
       return path
     else:
       valid, path,  = self.make_path_lines(path, crds)
       if valid:
+        print(path)
         return path
       else:
         print("ERROR creating path")
@@ -158,16 +158,10 @@ class MoveToCmds:
 if __name__ == "__main__":
   move = MoveToCmds()
   i = 0
-  while i < 3:
+  while i < 1:
     if i == 0:
-      board = [(1,1),(4,2),(6,5)]
-      cords = [(0,5),(4,4)]
-    elif i == 2:
-      board = [(0,7),(3,3),(3,5)]
-      cords = [(0,0),(5,4)]
-    else:
-      board = [(1,7),(5,3),(0,5)]
-      cords = [(2,0),(6,4)]
+      board = [(1,1),(2,2),(6,5)]
+      cords = [(6,0),(3.5,3.5)]
     move.print_board(move.move(board,cords))
     i += 1
   
