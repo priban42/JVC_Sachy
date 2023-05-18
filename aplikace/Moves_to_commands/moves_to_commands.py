@@ -13,6 +13,7 @@ class MoveToCmds:
     self.final_cords = Cords(0, 0) 
     self.chess_status = dict()
     self.shiftL = 0.5
+    self.shiftS = 1
   
   def update_cords(self, cords):
     '''
@@ -113,17 +114,18 @@ class MoveToCmds:
    
     while xs != xf or ys != yf:
       xbf = xs
-      if xs < xf and xs + self.shiftL <= 7:
-        xs += self.shiftL
-      elif xs > xf and xs - self.shiftL >= 0:
-        xs -= self.shiftL
+      if xs < xf and xs + self.shiftS <= 7:
+        xs += self.shiftS
+      elif xs > xf and xs - self.shiftS >= 0:
+        xs -= self.shiftS
       ybf = ys
-      if ys < yf and ys + self.shiftL <= 7:
-        ys += self.shiftL
-      elif ys > yf and ys - self.shiftL >= 0:
-        ys -= self.shiftL
+      if ys < yf and ys + self.shiftS <= 7:
+        ys += self.shiftS
+      elif ys > yf and ys - self.shiftS >= 0:
+        ys -= self.shiftS
       if self.chess_status[(xs,ys)] == 0:
         path.append((xs,ys))
+        print("cords",(xs,ys))
       elif xs == xf and ys == yf:
         path.append((xs,ys))
       else:
@@ -161,7 +163,11 @@ class MoveToCmds:
 
 if __name__ == "__main__":
   move = MoveToCmds()
-  board = [(1,1),(2,2),(6,5)]
-  cords = [(6,0),(3.5,3.5)]
-  move.move(board,cords)
+  i = 0
+  while i < 1:
+    if i == 0:
+      board = [(1,1),(2,2),(6,6),(5,6)]
+      cords = [(6,7),(3.5,3.5)]
+    move.print_board(move.move(board,cords))
+    i += 1
   
