@@ -55,7 +55,7 @@ class MoveToCmds:
     base on decision, that was made at the beginning.
     It returns array of cords (x,y).
     '''
-    print("DOING LINES",crds) 
+    print("DOING LINES cords are:",crds) 
     xs, ys = crds
     xf, yf = self.final_cords.x, self.final_cords.y
     sign = ''
