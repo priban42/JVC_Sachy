@@ -55,29 +55,30 @@ class MoveToCmds:
     base on decision, that was made at the beginning.
     It returns array of cords (x,y).
     '''
+    print("DOING LINES",crds) 
     xs, ys = crds
     xf, yf = self.final_cords.x, self.final_cords.y
     sign = ''
-    
-    if xs >= xf:
-      if xs - self.shiftL >= 0:
-        xs -= self.shiftL
-        if ys + self.shiftL <= 7:
-          ys += self.shiftL
-          sign = '+'
-        elif ys - self.shiftL >= 0:
-          ys -= self.shiftL
-          sign = '-'
-    elif xs <= xf:
-      if xs + self.shiftL <= 7:
-        xs += self.shiftL
-        if ys + self.shiftL <= 7:
-          ys += self.shiftL
-          sign = '+'
-        elif ys - self.shiftL >= 0:
-          ys -= self.shiftL
-          sign = '-'
-    path.append((xs,ys))
+    if xs % 1 == 0 and ys % 1 == 0:
+      if xs >= xf:
+        if xs - self.shiftL >= 0:
+          xs -= self.shiftL
+          if ys + self.shiftL <= 7:
+            ys += self.shiftL
+            sign = '+'
+          elif ys - self.shiftL >= 0:
+            ys -= self.shiftL
+            sign = '-'
+      elif xs <= xf:
+        if xs + self.shiftL <= 7:
+          xs += self.shiftL
+          if ys + self.shiftL <= 7:
+            ys += self.shiftL
+            sign = '+'
+          elif ys - self.shiftL >= 0:
+            ys -= self.shiftL
+            sign = '-'
+      path.append((xs,ys))
    
     while ys != yf - self.shiftL and ys != yf + self.shiftL:
       if ys < yf:
@@ -105,27 +106,31 @@ class MoveToCmds:
     If it's occupied then it switches to another function that goes by lines.
     It returns validity of path, array of cords (x,y) and last cords.
     '''
+    print("DOING SQUARES")
     xs, ys = self.start_cords.x, self.start_cords.y
     xf, yf = self.final_cords.x, self.final_cords.y
     xbf = 0
     ybf = 0
     path = []
     path.append((xs,ys))
-   
+    if xf % 1 == 0 or yf % 1 == 0:
+      shift = self.shiftS
+    else:
+      shift = self.shiftL
+
     while xs != xf or ys != yf:
       xbf = xs
-      if xs < xf and xs + self.shiftS <= 7:
-        xs += self.shiftS
-      elif xs > xf and xs - self.shiftS >= 0:
-        xs -= self.shiftS
+      if xs < xf and xs + shift <= 7:
+        xs += shift
+      elif xs > xf and xs - shift >= 0:
+        xs -= shift
       ybf = ys
-      if ys < yf and ys + self.shiftS <= 7:
-        ys += self.shiftS
-      elif ys > yf and ys - self.shiftS >= 0:
-        ys -= self.shiftS
+      if ys < yf and ys + shift <= 7:
+        ys += shift
+      elif ys > yf and ys - shift >= 0:
+        ys -= shift
       if self.chess_status[(xs,ys)] == 0:
         path.append((xs,ys))
-        print("cords",(xs,ys))
       elif xs == xf and ys == yf:
         path.append((xs,ys))
       else:
@@ -161,13 +166,35 @@ class MoveToCmds:
     self.update_board(board)
     return self.decide()
 
+  def print_board(self, path):
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_axes([0.05, 0.05, 1, 1])
+    ax.set_xlim(-1, 8)
+    ax.set_ylim(-1, 8)
+    for j in np.arange(0,7.5,0.5):
+      for i in np.arange(0,7.5,0.5):
+        if (i,j) in path:
+          c = 'blue'
+          s = 100
+        elif i%1 == 0 and j%1 == 0 and self.chess_status[(i,j)] != 0:
+          c = 'red'
+          s = 100
+        elif  i%1 == 0 and j%1 == 0:
+          c = 'green'
+          s = 100
+        else:
+          c = 'black'
+          s = 10
+        ax.scatter(i,j, s=s, c=c, marker='o')
+    plt.show()
+
+
 if __name__ == "__main__":
   move = MoveToCmds()
   i = 0
   while i < 1:
     if i == 0:
-      board = [(1,1),(2,2),(6,6),(5,6)]
-      cords = [(6,7),(3.5,3.5)]
+      board = [(1,1),(5,6),(6,6),(7,6)]
+      cords = [(6,7),(3.5,5)]
     move.print_board(move.move(board,cords))
     i += 1
-  
