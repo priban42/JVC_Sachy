@@ -135,7 +135,7 @@ class SerialSender:
 
 
 def main():
-    sender = SerialSender('/dev/ttyUSB0')
+    sender = SerialSender('/dev/ttyUSB')
     sender.send_bare_command(5)
     sender.send_set_speed(150)
     sender.send_set_acceleraton(100)
