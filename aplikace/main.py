@@ -31,7 +31,7 @@ _WHITE_LONG = 1
 _BLACK_SHORT = 2
 _BLACK_LONG = 3
 _SERVO_WAIT = 0.3
-_MOTOR_SPEED = 200
+_MOTOR_SPEED = 100
 _MOTOR_ACCEL = 180
 _MOTORS_ON = 5
 _MOTOR_OFF = 4
@@ -287,7 +287,7 @@ class ChessGUI(object):
         Init serial obj for sending data over serial
         :return:
         """
-        Serial_sender.SerialSender(_SERIAL_PORT)
+        self._sender = Serial_sender.SerialSender(_SERIAL_PORT)
         self._sender.send_bare_command(_MOTORS_ON)
         self._sender.send_set_speed(_MOTOR_SPEED)
         self._sender.send_set_acceleraton(_MOTOR_ACCEL)
@@ -400,7 +400,9 @@ class ChessGUI(object):
         time.sleep(_SERVO_WAIT)
         """
         move_recalc = (self._captured_pos[1], 7 - self._captured_pos[0])
-        coord = self._get_coords([(*move_recalc), (7, 3.5)])
+        print("Recalced move: ", move_recalc)
+        coord = self._get_coords([(self._captured_pos[0], self._captured_pos[1]), (3.5, 7)])
+        print("Calced coords", )
         for i, coord in enumerate(coord):
             if i == 1:
                 self._sender.send_set_servo(_SERVO_ON)
@@ -411,9 +413,11 @@ class ChessGUI(object):
         self._sender.send_set_servo(_SERVO_OFF)
         self._sender.wait_for_empty_buffer()
         time.sleep(_SERVO_WAIT)
-        self._sender.send_move(3.5, 3.5)
+        self._sender.send_move((3.5, 3.5))
         self._sender.wait_for_empty_buffer()
-        #TODO: CLEAR Command
+        #Clear captured figure
+        self._sender.send_remover()
+        time.sleep(0.5)
 
 
     def _serial_castle(self):
@@ -442,6 +446,7 @@ class ChessGUI(object):
             # play sound
             self.__detect_special_moves(move, promotion)
             self.__play_sound(promotion)
+            print("playing move: ", move)
             if self._use_serial:
                 cnc_coords = []
                 if self._was_capture:
@@ -451,6 +456,9 @@ class ChessGUI(object):
                 elif self._was_castle:
                     print("Castle move: ", self._castle_type)
                     self._serial_castle()
+                else:
+                    print("move:", move)
+                    cnc_coords = self._get_coords(move)
 
                 if cnc_coords:
                     for i, coord in enumerate(cnc_coords):
@@ -517,6 +525,7 @@ class ChessGUI(object):
 
                 _speech_commands = settings[3]
                 _serial_comm = settings[4]
+                print(_serial_comm)
                 if mode is not None:
                     run = False
             win.fill("#2d3436")
