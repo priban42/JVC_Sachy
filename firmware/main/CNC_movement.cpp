@@ -3,8 +3,7 @@
 #include "CNC_stepper.h"
 #include <SpeedyStepper.h>
 
-SpeedyStepper stepperX;
-SpeedyStepper stepperY;
+SpeedyStepper stepperR;
 
 CNC_stepper CNC_Stepper;
 
@@ -16,8 +15,7 @@ CNC_movement::CNC_movement(){
   CNC_Stepper.set_stepsPerMM_X(spmm_X);
   CNC_Stepper.set_stepsPerMM_Y(spmm_Y);
   
-  stepperX.connectToPins(stepX, dirX);
-  stepperY.connectToPins(stepY, dirY);
+  stepperR.connectToPins(stepR, dirR);
 
   pinMode(enableXY, OUTPUT);
 
@@ -86,6 +84,40 @@ void CNC_movement::moveXY_end_acc(){
   CNC_Stepper.set_acceleration(acceleration);
   CNC_Stepper.moveXY_end_acc();
   //CNC_Stepper.moveXY();
+}
+
+void CNC_movement::moveXY_no_acc(){
+  CNC_Stepper.set_current_X(current_X);
+  CNC_Stepper.set_current_Y(current_Y);
+  
+  CNC_Stepper.set_next_X(next_X);
+  CNC_Stepper.set_next_Y(next_Y);
+  
+  CNC_Stepper.set_speed(max_Speed);
+  CNC_Stepper.moveXY_no_acc();
+}
+
+void CNC_movement::move_R(){
+  
+  stepperR.setSpeedInStepsPerSecond(200);
+  stepperR.setAccelerationInStepsPerSecondPerSecond(4000);
+  stepperR.setupRelativeMoveInSteps(180);
+  
+  while(!stepperR.motionComplete()){ 
+    stepperR.processMovement();
+  }
+  stepperR.setupRelativeMoveInSteps(-180);
+  while(!stepperR.motionComplete()){ 
+    stepperR.processMovement();
+  }
+  stepperR.setupRelativeMoveInSteps(180);
+  while(!stepperR.motionComplete()){ 
+    stepperR.processMovement();
+  }
+  stepperR.setupRelativeMoveInSteps(-180);
+  while(!stepperR.motionComplete()){ 
+    stepperR.processMovement();
+  }
 }
 
 void CNC_movement::calibrate(){

@@ -6,8 +6,11 @@
 #define dirX 5
 #define stepX 2
 
-#define dirY 6
-#define stepY 3
+#define dirY 7
+#define stepY 4
+
+#define dirR 6
+#define stepR 3
 
 #define enableXY 8
 
@@ -22,6 +25,10 @@ class CNC_movement{
     void moveXY();
     void moveXY_start_acc();
     void moveXY_end_acc();
+    void moveXY_no_acc();
+
+    void move_R();
+    
     void disableMotors();
     void enableMotors();
     void calibrate();
@@ -38,13 +45,14 @@ class CNC_movement{
     long next_X = 0;
     long next_Y = 0;
 
+    long current_X = 0;
+    long current_Y = 0;
+
   private:
     
     SpeedyStepper stepperX;
     SpeedyStepper stepperY;
     
-    long current_X = 0;
-    long current_Y = 0;
 };
 
 #endif

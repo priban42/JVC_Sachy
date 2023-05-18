@@ -1,18 +1,19 @@
 #include "Parser.h"
+#include <Servo.h>
 
 #define SERVO_PIN 10
 Servo servo;
+Servo servo_remover;
 
 
 Parser parser;
 
 
 void setup() {
-  Parser parser;
   servo.attach(SERVO_PIN);
-  servo.write(50);
+  Parser parser;
 }
 
 void loop() {
-  parser.parseNext(servo);
+  parser.parseNext(servo, servo_remover);
 }

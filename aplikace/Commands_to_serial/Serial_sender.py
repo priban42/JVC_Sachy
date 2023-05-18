@@ -97,6 +97,11 @@ class SerialSender:
     def send_move_start_acc(self, coordinates):
         new_coordinates = self.__coordinates_to_core_XY(coordinates)
         self.send_bytearray(self.__get_packed_coordinates(10, new_coordinates))
+    def send_move_eject(self, coordinates, angle):
+        new_coordinates = self.__coordinates_to_core_XY(coordinates)
+        msg = self.__get_packed_coordinates(11, new_coordinates)
+        msg.extend((angle).to_bytes(1, byteorder='big'))
+        self.send_bytearray(msg)
     def send_bare_command(self, command):
         self.send_bytearray((command).to_bytes(self.COMMAND_SIZE, byteorder='big'))
 
@@ -111,43 +116,33 @@ class SerialSender:
         msg.extend(int(acceleration*2**(0.5)).to_bytes(self.ACCELERATION_SIZE, byteorder='big'))
         self.send_bytearray(msg)
 
+
     def send_set_servo(self, strength):  # strength int between 0 and 180
         msg = bytearray()
         msg.extend((8).to_bytes(self.COMMAND_SIZE, byteorder='big'))
         msg.extend((strength).to_bytes(1, byteorder='big'))
         self.send_bytearray(msg)
 
+    def send_remover(self):  # strength int between 0 and 180
+        msg = bytearray()
+        msg.extend((12).to_bytes(self.COMMAND_SIZE, byteorder='big'))
+        self.send_bytearray(msg)
+    def send_delay(self, time_ms):  # strength int between 0 and 180
+        msg = bytearray()
+        msg.extend((3).to_bytes(self.COMMAND_SIZE, byteorder='big'))
+        msg.extend((time_ms).to_bytes(2, byteorder='big'))
+        self.send_bytearray(msg)
+
 
 def main():
     sender = SerialSender('/dev/ttyUSB0')
     sender.send_bare_command(5)
-    sender.send_set_speed(200)
-    sender.send_set_acceleraton(20)
-    #sender.send_set_servo(180)#180 = off
-    #sender.send_set_servo(180)  # 180 = off
-    #sender.send_move((0, 2))
-    sender.send_set_servo(0)
-    sender.wait_for_empty_buffer()
-    time.sleep(1)
-    #sender.send_set_servo(50)
-    sender.send_move((0, 5))
-
-
-    #sender.send_move_end_acc((2, 0))
-    #sender.send_set_servo(85)#180 = off
-    #sender.wait_for_empty_buffer()
-    ##time.sleep(0.2)
-    #sender.send_move((2, 0))
-    #sender.send_move((2, 2))
+    sender.send_set_speed(150)
+    sender.send_set_acceleraton(100)
     #sender.send_move((0, 2))
     #sender.send_move((0, 0))
-    #sender.send_set_servo(180)  # 180 = off
-    #time.sleep(3)
-    #sender.send_move((0, 0))
-    #sender.send_set_servo(100)#100 = on
-    #sender.send_move((2, 0))
-    #sender.send_move((2, 2))
-    #sender.send_move((0, 0))
+    sender.send_remover()
+
     sender.send_bare_command(4)
 
 

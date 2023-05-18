@@ -1,14 +1,14 @@
 #ifndef CNC_stepper_h
 #define CNC_stepper_h
 #include <Arduino.h>
-#include <digitalWriteFast.h>
+//#include <digitalWriteFast.h>
 
 
 #define pin_dirX 5
 #define pin_stepX 2
 
-#define pin_dirY 6
-#define pin_stepY 3
+#define pin_dirY 7
+#define pin_stepY 4
 
 class CNC_stepper{
   public:
@@ -16,6 +16,7 @@ class CNC_stepper{
     void moveXY();
     void moveXY_end_acc();
     void moveXY_start_acc();
+    void moveXY_no_acc();
     
     void init();
 

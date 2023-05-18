@@ -14,6 +14,58 @@ void CNC_stepper::init(){
 
 //////////////////////////////////////////////////////////
 
+void CNC_stepper::moveXY_no_acc(){
+  setDirectionsXY();
+  stepsToGo_X = abs(next_X - current_X);
+  stepsToGo_Y = abs(next_Y - current_Y);
+
+  Base = Q_rsqrt(sq(stepsToGo_X/steps_per_mm_X) + sq(stepsToGo_Y/steps_per_mm_Y));
+  Base_speed = (Base*max_Speed);
+
+  speed_X = Base_speed*stepsToGo_X;
+  speed_Y = Base_speed*stepsToGo_Y;
+
+  step_count_X = 0;
+  step_count_Y = 0;
+
+  done_X = false;
+  done_Y = false;
+  
+  mezera_X = 1000000/(speed_X);
+  mezera_Y = 1000000/(speed_Y);
+
+  mezera_sum_X = 0;
+  mezera_sum_Y = 0;
+  
+  first_step = micros();
+  while (!done_X || !done_Y){
+    if (step_count_X < stepsToGo_X){
+      if ((micros() - first_step) >= (mezera_sum_X)){
+        digitalWriteFast(pin_stepX, HIGH);
+        digitalWriteFast(pin_stepX, LOW);
+        mezera_sum_X += mezera_X;
+        step_count_X++;
+      }
+    }else{
+      done_X = true;
+    }
+    if (step_count_Y < stepsToGo_Y){
+      if ((micros() - first_step) >= (mezera_sum_Y)){
+        digitalWriteFast(pin_stepY, HIGH);
+        digitalWriteFast(pin_stepY, LOW);
+        mezera_sum_Y += mezera_Y;
+        step_count_Y++;
+      }
+    }else{
+      done_Y = true;
+    }
+  }
+
+  current_X = next_X;
+  current_Y = next_Y;
+}
+
+//////////////////////////////////////////////////////////
 void CNC_stepper::moveXY(){
   setDirectionsXY();
   stepsToGo_X = abs(next_X - current_X);
