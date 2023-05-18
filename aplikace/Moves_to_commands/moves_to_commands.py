@@ -16,6 +16,7 @@ class MoveToCmds:
   
   def update_cords(self, cords):
     '''
+    cords - array of two cords [(xs,ys),(xf,yf)]
     Function updates start and final cords if it's called.
     '''
     self.start_cords = Cords(cords[0][0], cords[0][1])
@@ -34,6 +35,7 @@ class MoveToCmds:
 
   def update_board(self, board):
     '''
+    board - array of cords [(x,y),(x,y),...]
     Function clears board status and adds 1 on positions, where figures are, by given array of positions (board) of figures.
     It returns dictionary with cords as a key and values 0 or 1.
     '''
@@ -44,6 +46,8 @@ class MoveToCmds:
 
   def make_path_lines(self, path, crds):
     '''
+    path - array of cords [(x,y),(x,y),...]
+    crds - cords (x,y)
     At the start its decide, wich line is closer to final position, than the sign is set.
     Function goes by lines on board till it reaches same row, where final postion is.
     Then it goes in columns until it reaches same column. In the end it goes up or down
@@ -146,6 +150,8 @@ class MoveToCmds:
 
   def move(self, board, cords):
     '''
+    cords - array of two cords [(xs,ys),(xf,yf)]
+    board - array of cords [(x,y),(x,y),...]s
     Main function, calls other functions.
     Returns array of cords (x,y).
     '''
