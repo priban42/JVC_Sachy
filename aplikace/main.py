@@ -378,7 +378,8 @@ class ChessGUI(object):
         Sends capture commands over serial
         :return:
         """
-        move_recalc = (self._captured_pos[1], 7 - self._captured_pos[0])
+        """
+        
         if move_recalc[1] > 3:
             dy = -0.5
         else:
@@ -397,6 +398,23 @@ class ChessGUI(object):
         self._sender.send_set_servo(_SERVO_OFF)
         self._sender.wait_for_empty_buffer()
         time.sleep(_SERVO_WAIT)
+        """
+        move_recalc = (self._captured_pos[1], 7 - self._captured_pos[0])
+        coord = self._get_coords([(*move_recalc), (7, 3.5)])
+        for i, coord in enumerate(coord):
+            if i == 1:
+                self._sender.send_set_servo(_SERVO_ON)
+                self._sender.wait_for_empty_buffer()
+                time.sleep(_SERVO_WAIT)
+            self._sender.send_move(coord)
+
+        self._sender.send_set_servo(_SERVO_OFF)
+        self._sender.wait_for_empty_buffer()
+        time.sleep(_SERVO_WAIT)
+        self._sender.send_move(3.5, 3.5)
+        self._sender.wait_for_empty_buffer()
+        #TODO: CLEAR Command
+
 
     def _serial_castle(self):
         """
@@ -519,6 +537,11 @@ class ChessGUI(object):
             self._use_serial = True
         """---- Main Loop ----"""
         run = not q
+
+        """run = False
+        self._castle_type = _WHITE_LONG
+        self._serial_castle()
+        """
         while run:
             clock.tick(30)
             for event in pygame.event.get():
