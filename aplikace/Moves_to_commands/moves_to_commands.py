@@ -106,18 +106,17 @@ class MoveToCmds:
     If it's occupied then it switches to another function that goes by lines.
     It returns validity of path, array of cords (x,y) and last cords.
     '''
-    print("DOING SQUARES")
     xs, ys = self.start_cords.x, self.start_cords.y
     xf, yf = self.final_cords.x, self.final_cords.y
     xbf = 0
     ybf = 0
     path = []
     path.append((xs,ys))
-    if xf % 1 == 0 or yf % 1 == 0:
+    if xf % 1 == 0 and yf % 1 == 0:
       shift = self.shiftS
     else:
       shift = self.shiftL
-
+    print("DOING SQUARES","shift is",shift)
     while xs != xf or ys != yf:
       xbf = xs
       if xs < xf and xs + shift <= 7:
@@ -195,6 +194,6 @@ if __name__ == "__main__":
   while i < 1:
     if i == 0:
       board = [(1,1),(5,6),(6,6),(7,6)]
-      cords = [(6,7),(3.5,5)]
+      cords = [(6,7),(3.5,2)]
     move.print_board(move.move(board,cords))
     i += 1
