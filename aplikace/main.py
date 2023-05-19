@@ -16,13 +16,13 @@ _SERVO_OFF = 60
 _SERVO_ON = 0
 
 # HARDCODED CASTLE MOVES 0 - WHITE SHORT CASTLE, 1 - WHITE LONG, 2 - BLACK SHORT, 3 - BLACK LONG
-_CASTLE_MOVES = [[[(7, 0), (6.5, 0.5), (6.5, 1)], [(4, 0), (6, 0)], [(6.5, 1), (6.5, 0.5), (5, 0.5), (5, 0)]],
+_CASTLE_MOVES = [[[(7, 0), (6.5, 0.5)], [(4, 0), (6, 0)], [(6.5, 0.5), (5, 0.5), (5, 0)]],
                  # WHITE SHORT CASLTE
-                 [[(0, 0), (0.5, 0.5), (0.5, 1)], [(4, 0), (2, 0)], [(0.5, 1), (0.5, 0.5), (3, 0.5), (3, 0)]],
+                 [[(0, 0), (0.5, 0.5)], [(4, 0), (2, 0)], [(0.5, 0.5), (3, 0.5), (3, 0)]],
                  # WHITE LONG CASTLE
-                 [[(7, 7), (6.5, 6.5), (6.5, 6)], [(4, 7), (6, 7)], [(6.5, 6), (6.5, 6.5), (5, 6.5), (5, 7)]],
+                 [[(7, 7), (6.5, 6.5)], [(4, 7), (6, 7)], [(6.5, 6.5), (5, 6.5), (5, 7)]],
                  # BLACK SHORT CASTLE
-                 [[(0, 7), (0.5, 6.5), (0.5, 6)], [(4, 7), (2, 7)], [(0.5, 6), (0.5, 6.5), (3, 6.5), (3, 7)]],
+                 [[(0, 7), (0.5, 6.5)], [(4, 7), (2, 7)], [(0.5, 6.5), (3, 6.5), (3, 7)]],
                  # BLACK LONG CASTLE
                  ]
 
@@ -601,6 +601,8 @@ class ChessGUI(object):
                 self.draw(win)
 
         if self._use_serial:
+            self._sender.send_move((0, 0))
+            self._sender.wait_for_empty_buffer()
             self._sender.send_bare_command(4)
             self._sender.Serial.close()
 
