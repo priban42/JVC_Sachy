@@ -5,6 +5,7 @@ from Speech_to_moves import VoiceControl
 from Chess_AI import ChessAI
 from Moves_to_commands import moves_to_commands
 from Commands_to_serial import Serial_sender
+from Moves_to_commands import solver
 import time
 
 """Test function before chess logic is done"""
@@ -120,6 +121,7 @@ class ChessGUI(object):
         self._captured_pos = None
         self._mode = self._PVP
         self._move_calc = moves_to_commands.MoveToCmds()
+        self._move_calc_optimal = solver.A_star_solver()
         self._sender = None
         self._use_serial = False
         self.game_ended = False
@@ -354,6 +356,8 @@ class ChessGUI(object):
         self.play_move(move_rc, promotion)
 
     def _get_coords(self, move):
+        """
+        # OLD VERSION - NOT OPTIMAL
         full_squares = []
         for row in range(8):
             for col in range(8):
@@ -361,6 +365,13 @@ class ChessGUI(object):
                     full_squares.append([col, 7 - row])
         move = [[move[0][1], 7 - move[0][0]], [move[1][1], 7 - move[1][0]]]
         return self._move_calc.move(full_squares, move)
+        """
+        full_squares = []
+        for row in range(8):
+            for col in range(8):
+                if self.__logic.get_piece(row, col) != 0:
+                    full_squares.append((row, col))
+        return self._move_calc_optimal.calc_path(full_squares, move)
 
     def __reset_board(self) -> None:
         print("PLAYER: ", self.__logic.get_player_playing() * -1, " WON")
@@ -399,10 +410,7 @@ class ChessGUI(object):
         self._sender.wait_for_empty_buffer()
         time.sleep(_SERVO_WAIT)
         """
-        move_recalc = (self._captured_pos[1], 7 - self._captured_pos[0])
-        print("Recalced move: ", move_recalc)
         coord = self._get_coords([(self._captured_pos[0], self._captured_pos[1]), (3.5, 7)])
-        print("Calced coords", )
         for i, coord in enumerate(coord):
             if i == 1:
                 self._sender.send_set_servo(_SERVO_ON)
@@ -417,6 +425,7 @@ class ChessGUI(object):
         self._sender.wait_for_empty_buffer()
         #Clear captured figure
         self._sender.send_remover()
+        self._sender.wait_for_empty_buffer()
         time.sleep(0.5)
 
 
