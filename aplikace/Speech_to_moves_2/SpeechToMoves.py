@@ -52,7 +52,6 @@ class SpeechToMoves():
 def main():
     spt = SpeechToMoves()
     spt.start()
-    print("here")
     while(1):
         if spt.available():
             print(spt.get_next_coordinate())
