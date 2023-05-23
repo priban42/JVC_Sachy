@@ -410,8 +410,9 @@ class ChessGUI(object):
         self._sender.wait_for_empty_buffer()
         time.sleep(_SERVO_WAIT)
         """
-        coord = self._get_coords([(self._captured_pos[0], self._captured_pos[1]), (3.5, 7)])
-        for i, coord in enumerate(coord):
+        coords = self._get_coords([(self._captured_pos[0], self._captured_pos[1]), (3.5, 7)])
+        print("capture coords: ", coords)
+        for i, coord in enumerate(coords):
             if i == 1:
                 self._sender.send_set_servo(_SERVO_ON)
                 self._sender.wait_for_empty_buffer()
@@ -427,6 +428,7 @@ class ChessGUI(object):
         self._sender.send_remover()
         self._sender.wait_for_empty_buffer()
         time.sleep(0.5)
+        print("move done")
 
 
     def _serial_castle(self):
@@ -470,6 +472,7 @@ class ChessGUI(object):
                     cnc_coords = self._get_coords(move)
 
                 if cnc_coords:
+                    print("cnc coords:", cnc_coords)
                     for i, coord in enumerate(cnc_coords):
                         if i == 1:
                             self._sender.send_set_servo(_SERVO_ON)
@@ -480,6 +483,7 @@ class ChessGUI(object):
                     self._sender.send_set_servo(_SERVO_OFF)
                     self._sender.wait_for_empty_buffer()
                     time.sleep(_SERVO_WAIT)
+                    print("move done")
 
             # Do the move
             self.__logic.play_move(move, promotion)

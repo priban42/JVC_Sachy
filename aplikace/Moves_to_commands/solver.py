@@ -81,6 +81,8 @@ class A_star_solver(object):
 
     def __disatnce(self, current, neighbour):
         if current[0] != neighbour[0] and current[1] != neighbour[1]:
+            if (current[0] % 2 == 1 or current[1] % 2 == 1) and (neighbour[0] % 1 == 1 or neighbour[1] % 2 == 1):
+                return 100
             return 14
         else:
             return 10

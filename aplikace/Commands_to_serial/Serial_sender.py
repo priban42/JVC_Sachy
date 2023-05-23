@@ -13,7 +13,7 @@ class SerialSender:
     SPEED_SIZE = 2  # in bytes
     ACCELERATION_SIZE = 2 # in bytes
 
-    STEPS_PER_MM_XY = numpy.array([40.0, 40.0])
+    STEPS_PER_MM_XY = numpy.array([160.0, 160.0])
     BASE = numpy.array([int((2 ** (8 * COORDINATE_SIZE - 1))), int((2 ** (8 * COORDINATE_SIZE - 1)))])
     THETA = numpy.deg2rad(-45)
     ROTATION_MATRIX = numpy.array([[math.cos(THETA), -math.sin(THETA)], [math.sin(THETA), math.cos(THETA)]])
