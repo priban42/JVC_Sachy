@@ -135,13 +135,18 @@ class SerialSender:
 
 
 def main():
-    sender = SerialSender('/dev/ttyUSB')
+    sender = SerialSender('/dev/tty.usbserial-1130')
     sender.send_bare_command(5)
-    sender.send_set_speed(150)
-    sender.send_set_acceleraton(100)
-    #sender.send_move((0, 2))
-    #sender.send_move((0, 0))
-    sender.send_remover()
+    sender.send_set_speed(50)
+    sender.send_set_servo(0)
+    sender.wait_for_empty_buffer()
+    time.sleep(0.5)
+    sender.send_set_acceleraton(200)
+    sender.send_move((0, 0))
+    sender.send_move((7, 7))
+    sender.send_set_servo(60)
+    #sender.send_remover()
+    sender.send_move((0, 0))
 
     sender.send_bare_command(4)
 

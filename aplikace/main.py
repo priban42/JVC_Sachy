@@ -1,7 +1,8 @@
 import pygame
 from Chess_logic import logic
 from GUI import menu
-from Speech_to_moves import VoiceControl
+#from Speech_to_moves import VoiceControl
+from Speech_to_moves_2 import SpeechToMoves
 from Chess_AI import ChessAI
 from Moves_to_commands import moves_to_commands
 from Commands_to_serial import Serial_sender
@@ -32,8 +33,8 @@ _WHITE_LONG = 1
 _BLACK_SHORT = 2
 _BLACK_LONG = 3
 _SERVO_WAIT = 0.3
-_MOTOR_SPEED = 100
-_MOTOR_ACCEL = 180
+_MOTOR_SPEED = 50
+_MOTOR_ACCEL = 200
 _MOTORS_ON = 5
 _MOTOR_OFF = 4
 
@@ -269,7 +270,8 @@ class ChessGUI(object):
         Initializes speech recognition module and starts new thread
         :return: None
         """
-        self._speech_recog = VoiceControl.VoiceControl(debug=True, info=True, recordTime=4, lan="en-US")
+        #self._speech_recog = VoiceControl.VoiceControl(debug=True, info=True, recordTime=4, lan="en-US")
+        self._speech_recog = SpeechToMoves.SpeechToMoves("Speech_to_moves_2/coordinates.dict")
         self._speech_recog.start()
 
     def __init_stockfish(self, stockfish=1) -> None:
@@ -282,7 +284,7 @@ class ChessGUI(object):
             self._stockfish.set_parameters(skill_level=0)
         elif stockfish == 2:
             self._stockfish2 = ChessAI.ChessAI(_STOCKFISH_ENGINE_PATH)
-            self._stockfish.set_parameters(skill_level=1)
+            self._stockfish2.set_parameters(skill_level=20)
 
     def __init_serial(self) -> None:
         """
@@ -484,7 +486,7 @@ class ChessGUI(object):
                     self._sender.wait_for_empty_buffer()
                     time.sleep(_SERVO_WAIT)
                     print("move done")
-
+            #print(self._get_coords(move))
             # Do the move
             self.__logic.play_move(move, promotion)
             self._recently_played_move = move
@@ -492,6 +494,13 @@ class ChessGUI(object):
             if self.__logic.is_checkmate():
                 print("PLAYER: ", "BLACK" if self.__logic.get_player_playing() * -1 == 1 else "WHITE", " WON")
                 self.game_ended = True
+                self._sender.send_set_servo(_SERVO_ON)
+                self._sender.send_set_servo(_SERVO_OFF)
+                self._sender.send_set_servo(_SERVO_ON)
+                self._sender.send_set_servo(_SERVO_OFF)
+                self._sender.send_set_servo(_SERVO_ON)
+                self._sender.send_set_servo(_SERVO_OFF)
+                self._sender.wait_for_empty_buffer()
                 #self.__reset_board()
         else:
             print("Move not valid:", move, promotion)
@@ -570,8 +579,7 @@ class ChessGUI(object):
                 if event.type == pygame.QUIT:
                     run = False
                     if _speech_commands:
-                        self._speech_recog.runControl = False
-                        self._speech_recog.join(1)
+                        self._speech_recog.close()
                 if not self.game_ended:
                     if (mode == self._PVAI and self.__logic.get_player_playing() != self.my_color) or mode == self._AIVAI:
                         pass
@@ -590,23 +598,26 @@ class ChessGUI(object):
                         self._play_stockfish_move(self._recently_played_move, self._recent_promotion, 2)
 
                 if _speech_commands:
-                    if self._speech_recog.dataReady:
-                        move = self._speech_recog.read_data()
-                        if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
-                            pass
-                        elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
-                            if self.__logic.is_valid_move(move):
-                                print("Voice command valid- playing move: ", move)
-                                self.play_move(move)
-                            else:
-                                print("voice command not valid!")
+                    if self._speech_recog.available():
+                        move = self._speech_recog.get_next_coordinate()
+                        if move:
+                            print(move)
+                            move = [(7 - move[0][1], move[0][0]), (7 - move[1][1], move[1][0])]
+                            if mode == self._PVAI and self.__logic.get_player_playing() != self.my_color:
+                                pass
+                            elif mode == self._PVAI and self.__logic.get_player_playing() == self.my_color:
+                                if self.__logic.is_valid_move(move):
+                                    print("Voice command valid- playing move: ", move)
+                                    self.play_move(move)
+                                else:
+                                    print("voice command not valid!")
 
-                        elif mode == self._PVP:
-                            if self.__logic.is_valid_move(move):
-                                print("Voice command valid- playing move: ", move)
-                                self.play_move(move)
-                            else:
-                                print("voice command not valid!")
+                            elif mode == self._PVP:
+                                if self.__logic.is_valid_move(move):
+                                    print("Voice command valid- playing move: ", move)
+                                    self.play_move(move)
+                                else:
+                                    print("voice command not valid!")
 
                 if self._mouse_down:
                     pos = pygame.mouse.get_pos()

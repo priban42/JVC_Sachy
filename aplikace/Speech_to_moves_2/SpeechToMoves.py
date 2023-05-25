@@ -6,8 +6,8 @@ import queue
 class SpeechToMoves():
     LETTERS = {"a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7, "eight":0}
     NUMBERS = {"one": 0, "two": 1, "three": 2, "four": 3, "five": 4, "six": 5, "seven": 6, "eight": 7}
-    def __init__(self):
-        self.speech = LiveSpeech(dict="coordinates.dict")
+    def __init__(self, dict_path="coordinates.dict"):
+        self.speech = LiveSpeech(dict=dict_path)
         self.buffer = queue.Queue()
         self.coord_assembly = queue.Queue()
         self.last_time = 0
@@ -34,6 +34,7 @@ class SpeechToMoves():
             return self.buffer.get()
     def check_phrase(self):
         for phrase in self.speech:
+            print(phrase)
             self.buffer.put(self.phrase_to_command(phrase))
             if not self.running:
                 return

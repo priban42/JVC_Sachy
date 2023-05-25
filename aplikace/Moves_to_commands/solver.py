@@ -81,7 +81,7 @@ class A_star_solver(object):
 
     def __disatnce(self, current, neighbour):
         if current[0] != neighbour[0] and current[1] != neighbour[1]:
-            if (current[0] % 2 == 1 or current[1] % 2 == 1) and (neighbour[0] % 1 == 1 or neighbour[1] % 2 == 1):
+            if (current[0] % 2 == 1 or current[1] % 2 == 1) and (neighbour[0] % 2 == 1 or neighbour[1] % 2 == 1):
                 return 100
             return 14
         else:
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         for col in range(8):
             if row in [6, 7, 0, 1]:
                 filled.append((row, col))
-    move = [(0, 6), (2, 5)]
+    move = [(7, 6), (5, 5)]
     path = solver.calc_path(filled, move)
     print(path)
     path_vis = solver.draw_path(path)
